@@ -1,8 +1,22 @@
 import { normalizeURL } from "@/app/_lib/normalize-url";
 import { apiResponse } from "@/app/api/_lib/build-response";
 import { analyzeArticle } from "./_lib/service";
+import { acquireAnalysisSlot } from "./_lib/ip-analysis-limit";
 
 export async function POST(request: Request) {
+  const releaseAnalysisSlot = acquireAnalysisSlot(request);
+
+  if (!releaseAnalysisSlot) {
+    return apiResponse(
+      {
+        message:
+          "An article analysis is already in progress for this connection. Please wait for it to finish before submitting another article.",
+        data: null,
+      },
+      429,
+    );
+  }
+
   try {
     const body = (await request.json()) as { url: string };
     const url = body.url;
@@ -36,5 +50,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("error while processing article: ", error);
     return apiResponse({ message: "Unexpected Error", data: null }, 500);
+  } finally {
+    releaseAnalysisSlot();
   }
 }
