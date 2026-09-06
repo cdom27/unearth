@@ -12,12 +12,253 @@ import { anthropic } from "./utils/ai/anthropic/anthropic";
 import type { AnalysisResultDTO } from "./dtos/analysis-result";
 import type { SummaryDTO } from "./dtos/summary";
 import type { AnalysisDTO } from "./dtos/analysis";
-import { eq } from "drizzle-orm";
-import type { MetaDTO } from "./dtos/meta";
+import { eq, sql } from "drizzle-orm";
 import type { ClaimExtractionDTO } from "./dtos/claim-extraction";
 import { search } from "./utils/ai/exa/exa";
-import { Claim } from "./types/claim";
+import type { Claim } from "./types/claim";
 import { inspectMediaSubmission } from "./utils/inspect-media-submission";
+
+async function updateTaskStatus(
+  analysisId: string,
+  statusColumn:
+    | "summaryStatus"
+    | "rhetoricalAnalysisStatus"
+    | "claimExtractionStatus"
+    | "claimVerificationStatus"
+    | "factualScoreStatus",
+  status: "pending" | "running" | "completed",
+) {
+  await db
+    .update(analyses)
+    .set({ [statusColumn]: status })
+    .where(eq(analyses.id, analysisId));
+}
+
+async function runSummary(analysisId: string, textContent: string) {
+  const analysis = await db.query.analyses.findFirst({
+    where: (analyses, { eq }) => eq(analyses.id, analysisId),
+  });
+
+  if (!analysis || analysis.summaryStatus === "completed") return;
+
+  await updateTaskStatus(analysisId, "summaryStatus", "running");
+
+  try {
+    const response = await anthropic("claude-haiku-4-5", "summarize", textContent);
+
+    if (!response.data) throw new Error("No summary data returned");
+
+    await db
+      .update(analyses)
+      .set({
+        summary: response.data as SummaryDTO,
+        summaryStatus: "completed",
+        meta: sql`jsonb_set(
+          coalesce(${analyses.meta}, '{}'::jsonb),
+          '{summary}',
+          ${JSON.stringify(response.meta)}::jsonb,
+          true
+        )`,
+        updatedAt: new Date(),
+      })
+      .where(eq(analyses.id, analysisId));
+  } catch (error) {
+    await updateTaskStatus(analysisId, "summaryStatus", "pending");
+    throw error;
+  }
+}
+
+async function runRhetoricalAnalysis(analysisId: string, textContent: string) {
+  const analysis = await db.query.analyses.findFirst({
+    where: (analyses, { eq }) => eq(analyses.id, analysisId),
+  });
+
+  if (!analysis || analysis.rhetoricalAnalysisStatus === "completed") return;
+
+  await updateTaskStatus(analysisId, "rhetoricalAnalysisStatus", "running");
+
+  try {
+    const response = await anthropic("claude-sonnet-4-6", "analyze", textContent);
+
+    if (!response.data) throw new Error("No rhetorical analysis data returned");
+
+    const data = response.data as AnalysisDTO;
+
+    await db
+      .update(analyses)
+      .set({
+        sentiment: data.sentiment,
+        framing: data.framing,
+        biasScore: data.biasScore,
+        rhetoricalAnalysisStatus: "completed",
+        meta: sql`jsonb_set(
+          coalesce(${analyses.meta}, '{}'::jsonb),
+          '{analysis}',
+          ${JSON.stringify(response.meta)}::jsonb,
+          true
+        )`,
+        updatedAt: new Date(),
+      })
+      .where(eq(analyses.id, analysisId));
+  } catch (error) {
+    await updateTaskStatus(analysisId, "rhetoricalAnalysisStatus", "pending");
+    throw error;
+  }
+}
+
+async function runClaimExtraction(analysisId: string, textContent: string) {
+  const analysis = await db.query.analyses.findFirst({
+    where: (analyses, { eq }) => eq(analyses.id, analysisId),
+  });
+
+  if (!analysis || analysis.claimExtractionStatus === "completed") return;
+
+  await updateTaskStatus(analysisId, "claimExtractionStatus", "running");
+
+  try {
+    const response = await anthropic("claude-sonnet-4-6", "extract", textContent);
+
+    if (!response.data) throw new Error("No claim extraction data returned");
+
+    const data = response.data as ClaimExtractionDTO;
+    const claims: Claim[] = data.claims.map((content) => ({
+      content,
+      verification: null,
+    }));
+
+    await db
+      .update(analyses)
+      .set({
+        claims,
+        claimExtractionStatus: "completed",
+        meta: sql`jsonb_set(
+          coalesce(${analyses.meta}, '{}'::jsonb),
+          '{claimExtraction}',
+          ${JSON.stringify(response.meta)}::jsonb,
+          true
+        )`,
+        updatedAt: new Date(),
+      })
+      .where(eq(analyses.id, analysisId));
+  } catch (error) {
+    await updateTaskStatus(analysisId, "claimExtractionStatus", "pending");
+    throw error;
+  }
+}
+
+async function runClaimVerification(analysisId: string) {
+  const analysis = await db.query.analyses.findFirst({
+    where: (analyses, { eq }) => eq(analyses.id, analysisId),
+  });
+
+  if (
+    !analysis ||
+    analysis.claimExtractionStatus !== "completed" ||
+    analysis.claimVerificationStatus === "completed"
+  ) {
+    return;
+  }
+
+  await updateTaskStatus(analysisId, "claimVerificationStatus", "running");
+
+  try {
+    const claims = (analysis.claims as Claim[] | null) ?? [];
+    const verificationResults: {
+      verification: Awaited<ReturnType<typeof search>>["data"];
+      meta: Awaited<ReturnType<typeof search>>["meta"];
+    }[] = [];
+
+    for (const claim of claims) {
+      const result = await search(claim.content);
+      verificationResults.push({
+        verification: result.data,
+        meta: result.meta,
+      });
+    }
+
+    const verifiedClaims = claims.map((claim, index) => ({
+      ...claim,
+      verification: verificationResults[index].verification,
+    }));
+
+    await db
+      .update(analyses)
+      .set({
+        claims: verifiedClaims,
+        claimVerificationStatus: "completed",
+        meta: sql`jsonb_set(
+          coalesce(${analyses.meta}, '{}'::jsonb),
+          '{claimVerification}',
+          ${JSON.stringify({
+            model: "deep-lite",
+            requests: verificationResults.map((result) => result.meta),
+          })}::jsonb,
+          true
+        )`,
+        updatedAt: new Date(),
+      })
+      .where(eq(analyses.id, analysisId));
+  } catch (error) {
+    await updateTaskStatus(analysisId, "claimVerificationStatus", "pending");
+    throw error;
+  }
+}
+
+async function runFactualScore(analysisId: string) {
+  const analysis = await db.query.analyses.findFirst({
+    where: (analyses, { eq }) => eq(analyses.id, analysisId),
+  });
+
+  if (
+    !analysis ||
+    analysis.claimVerificationStatus !== "completed" ||
+    analysis.factualScoreStatus === "completed"
+  ) {
+    return;
+  }
+
+  await updateTaskStatus(analysisId, "factualScoreStatus", "running");
+
+  try {
+    const claims = (analysis.claims as Claim[] | null) ?? [];
+    const verdictScores = {
+      true: 1,
+      mixed: 0.5,
+      false: 0,
+    } as const;
+
+    const scores = claims
+      .map((claim) => claim.verification?.output?.content?.verdict)
+      .filter(
+        (verdict): verdict is keyof typeof verdictScores =>
+          verdict === "true" || verdict === "mixed" || verdict === "false",
+      );
+
+    const factualScore =
+      scores.length > 0
+        ? Number(
+            (
+              scores.reduce(
+                (sum, verdict) => sum + verdictScores[verdict],
+                0,
+              ) / scores.length
+            ).toFixed(2),
+          )
+        : -1;
+
+    await db
+      .update(analyses)
+      .set({
+        factualScore,
+        factualScoreStatus: "completed",
+        updatedAt: new Date(),
+      })
+      .where(eq(analyses.id, analysisId));
+  } catch (error) {
+    await updateTaskStatus(analysisId, "factualScoreStatus", "pending");
+    throw error;
+  }
+}
 
 export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
   try {
@@ -29,7 +270,6 @@ export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
 
     let parsedData;
 
-    // ensure an article record exists prior to attempting analysis
     if (!article) {
       const inspection = await inspectMediaSubmission(url);
 
@@ -75,7 +315,6 @@ export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
         };
       }
 
-      // must have a source prior to saving the article in the db
       let source = await db.query.sources.findFirst({
         where: (sources, { eq }) => eq(sources.url, hostname),
       });
@@ -93,12 +332,11 @@ export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
         source = newSource[0];
       }
 
-      // save article
       const newArticle = await db
         .insert(articles)
         .values({
           sourceId: source.id,
-          url: url,
+          url,
           title: parsedData.article.title || "",
           language: parsedData.article.lang || "",
           byline: parsedData.article.byline || "",
@@ -123,44 +361,18 @@ export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
       }
     }
 
-    // avoid duplicate analysis with precheck
     let analysis = await db.query.analyses.findFirst({
       where: (analyses, { eq }) => eq(analyses.articleId, article.id),
     });
 
-    let currentStatus = analysis?.status;
-    let analysisId = analysis?.id ?? "";
-    let analysisSlug = analysis?.slug ?? "";
-
-    if (currentStatus === "completed") {
-      return { success: true, slug: analysisSlug };
-    }
-
     if (!analysis) {
-      analysisSlug = slugify(article.title);
-
-      const summaryResponse = await anthropic(
-        "claude-haiku-4-5",
-        "summarize",
-        article.textContent,
-      );
-
-      if (!summaryResponse.data) {
-        console.error("No summary data returned for: ", article.id);
-        return { success: false, error: "Unexpected error" };
-      }
-
-      const parsedSummaryData = summaryResponse.data as SummaryDTO;
-
       const newAnalysis = await db
         .insert(analyses)
         .values({
           articleId: article.id,
-          slug: analysisSlug,
-          summary: parsedSummaryData,
-          status: "summarized",
+          slug: slugify(article.title),
           meta: {
-            summary: summaryResponse.meta,
+            summary: null,
             analysis: null,
             claimExtraction: null,
             claimVerification: null,
@@ -168,166 +380,44 @@ export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
         })
         .returning();
 
-      analysisId = newAnalysis[0].id;
-      currentStatus = "summarized";
-
       analysis = newAnalysis[0];
-
-      console.log("Completed summary for: ", analysisId);
     }
 
-    if (currentStatus === "summarized") {
-      const analysisResponse = await anthropic(
-        "claude-sonnet-4-6",
-        "analyze",
-        article.textContent,
-      );
-
-      if (!analysisResponse.data) {
-        console.error("No analysis data returned for: ", analysis.id);
-        return { success: false, error: "Unexpected error" };
-      }
-      const parsedAnalysisData = analysisResponse.data as AnalysisDTO;
-
-      const updatedAnalysis = await db
-        .update(analyses)
-        .set({
-          sentiment: parsedAnalysisData.sentiment,
-          framing: parsedAnalysisData.framing,
-          biasScore: parsedAnalysisData.biasScore,
-          status: "analyzed",
-          meta: {
-            ...(analysis.meta as MetaDTO),
-            analysis: analysisResponse.meta,
-          },
-          updatedAt: new Date(),
-        })
-        .where(eq(analyses.id, analysisId))
-        .returning();
-
-      currentStatus = "analyzed";
-
-      analysis = updatedAnalysis[0];
-
-      console.log("Completed analysis for: ", analysisId);
+    if (!analysis) {
+      return { success: false, error: "Unexpected error" };
     }
 
-    if (currentStatus === "analyzed") {
-      const extractionResponse = await anthropic(
-        "claude-sonnet-4-6",
-        "extract",
-        article.textContent,
-      );
+    const analysisId = analysis.id;
+    const analysisSlug = analysis.slug;
+    const textContent = article.textContent;
 
-      if (!extractionResponse.data) {
-        console.error("No analysis data returned for: ", analysis.id);
-        return { success: false, error: "Unexpected error" };
-      }
-      const parsedExtractionData =
-        extractionResponse.data as ClaimExtractionDTO;
+    const summaryPromise = runSummary(analysisId, textContent);
+    const rhetoricalAnalysisPromise = runRhetoricalAnalysis(
+      analysisId,
+      textContent,
+    );
+    const verificationPipelinePromise = runClaimExtraction(
+      analysisId,
+      textContent,
+    )
+      .then(() => runClaimVerification(analysisId))
+      .then(() => runFactualScore(analysisId));
 
-      const parsedClaimArr = parsedExtractionData.claims.map((claim) => ({
-        content: claim,
-        verification: null,
-      }));
+    const results = await Promise.allSettled([
+      summaryPromise,
+      rhetoricalAnalysisPromise,
+      verificationPipelinePromise,
+    ]);
 
-      const updatedAnalysis = await db
-        .update(analyses)
-        .set({
-          claims: parsedClaimArr,
-          status: "claims_extracted",
-          updatedAt: new Date(),
-        })
-        .where(eq(analyses.id, analysisId))
-        .returning();
+    const failure = results.find(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    );
 
-      currentStatus = "claims_extracted";
-
-      analysis = updatedAnalysis[0];
-
-      console.log("Completed claim extraction for: ", analysisId);
+    if (failure) {
+      console.error("One or more analysis tasks failed:", failure.reason);
+      return { success: false, error: "Unable to complete article analysis" };
     }
 
-    if (currentStatus === "claims_extracted") {
-      const claims = analysis.claims as Claim[];
-
-      const claimVerificationMeta = [];
-
-      for (const claim of claims) {
-        const searchResult = await search(claim.content);
-
-        claim.verification = searchResult.data;
-        claimVerificationMeta.push(searchResult.meta);
-      }
-
-      const meta = analysis.meta as MetaDTO;
-
-      const updatedAnalysis = await db
-        .update(analyses)
-        .set({
-          claims: claims,
-          meta: {
-            ...meta,
-            claimVerification: {
-              model: "deep-lite",
-              requests: claimVerificationMeta,
-            },
-          },
-          status: "claims_verified",
-          updatedAt: new Date(),
-        })
-        .where(eq(analyses.id, analysisId))
-        .returning();
-
-      analysis = updatedAnalysis[0];
-      currentStatus = "claims_verified";
-
-      console.log("Completed claim verification for: ", analysisId);
-    }
-
-    if (currentStatus === "claims_verified") {
-      const claims = analysis.claims as Claim[];
-
-      const verdictScores = {
-        true: 1,
-        mixed: 0.5,
-        false: 0,
-      } as const;
-
-      const scores = claims
-        .map((claim) => claim.verification?.output?.content?.verdict)
-        .filter(
-          (verdict): verdict is keyof typeof verdictScores =>
-            verdict === "true" || verdict === "mixed" || verdict === "false",
-        );
-
-      const factualScore =
-        scores.length > 0
-          ? Number(
-              (
-                scores.reduce(
-                  (sum, verdict) => sum + verdictScores[verdict],
-                  0,
-                ) / scores.length
-              ).toFixed(2),
-            )
-          : -1;
-
-      const updatedAnalysis = await db
-        .update(analyses)
-        .set({
-          factualScore,
-          status: "completed",
-          updatedAt: new Date(),
-        })
-        .where(eq(analyses.id, analysisId))
-        .returning();
-
-      analysis = updatedAnalysis[0];
-      currentStatus = "completed";
-
-      console.log("Completed analysis: ", analysisId);
-    }
     return { success: true, slug: analysisSlug };
   } catch (error) {
     console.error("Unexpected error when processing the URL:", url, error);
