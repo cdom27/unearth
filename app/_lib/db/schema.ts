@@ -11,11 +11,9 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-export const statusEnum = pgEnum("status", [
-  "summarized",
-  "analyzed",
-  "claims_extracted",
-  "claims_verified",
+export const analysisTaskStatusEnum = pgEnum("analysis_task_status", [
+  "pending",
+  "running",
   "completed",
 ]);
 
@@ -81,11 +79,37 @@ export const analyses = pgTable("analyses", {
   meta: jsonb("meta").notNull(),
   factualScore: doublePrecision("factual_score"),
   biasScore: doublePrecision("bias_score"),
-  status: statusEnum("status").notNull().default("summarized"),
+  summaryStatus: analysisTaskStatusEnum("summary_status")
+    .notNull()
+    .default("pending"),
+  rhetoricalAnalysisStatus: analysisTaskStatusEnum("rhetorical_analysis_status")
+    .notNull()
+    .default("pending"),
+  claimExtractionStatus: analysisTaskStatusEnum("claim_extraction_status")
+    .notNull()
+    .default("pending"),
+  claimVerificationStatus: analysisTaskStatusEnum("claim_verification_status")
+    .notNull()
+    .default("pending"),
+  factualScoreStatus: analysisTaskStatusEnum("factual_score_status")
+    .notNull()
+    .default("pending"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const rejectedSubmissions = pgTable("rejected_submissions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  submittedUrl: text("submitted_url").notNull(),
+  normalizedUrl: text("normalized_url").notNull(),
+  finalUrl: text("final_url"),
+  rejectionReason: text("rejection_reason").notNull(),
+  detectionSignals: jsonb("detection_signals").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });

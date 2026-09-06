@@ -7,4 +7,4 @@ export type AnalysisResultDTO =
       success: true;
       slug: string;
     }
-  | { success: false; error: string };
+  | { success: false; error: string; status?: number };

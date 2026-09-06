@@ -4,15 +4,6 @@ import type { ParsedArticleDTO } from "../dtos/article";
 import nlp from "compromise";
 import { slugify } from "./slugify";
 
-async function extractArticleHtml(url: string) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: ${response.status}`);
-  }
-
-  return await response.text();
-}
-
 function extractOgImage(html: string): string | null {
   const match =
     html.match(
@@ -34,8 +25,7 @@ function extractKeywords(title: string) {
   return keywordArray.join(" ").toLowerCase();
 }
 
-export async function parseArticle(url: string) {
-  const html = await extractArticleHtml(url);
+export async function parseArticle(html: string) {
   const { document } = parseHTML(html);
   const article = new Readability(document).parse();
   const thumbnailURL = extractOgImage(html);
