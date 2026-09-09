@@ -3,9 +3,10 @@ import ClockIcon from "../../icons/clock";
 import InfoIcon from "../../icons/info";
 
 interface ArticleBadgeProps {
-  variant: "time" | "bias";
+  variant: "time" | "bias" | "sourcing";
   timeStamp?: string;
   bias?: string;
+  sourcing?: string;
 }
 
 function getBiasColor(bias?: string) {
@@ -24,10 +25,24 @@ function getBiasColor(bias?: string) {
   }
 }
 
+function getSourcingColor(sourcing?: string) {
+  switch (sourcing) {
+    case "One sided":
+      return "bg-rating-low";
+    case "Mostly one sided":
+      return "bg-rating-mixed text-clay-900";
+    case "Balanced":
+      return "bg-rating-very-high";
+    default:
+      return "bg-clay-600";
+  }
+}
+
 export default function ArticleBadge({
   variant,
   timeStamp,
   bias,
+  sourcing,
 }: ArticleBadgeProps) {
   if (variant === "time") {
     if (timeStamp) {
@@ -50,6 +65,16 @@ export default function ArticleBadge({
         title={`Source typically leans ${bias}`}
       >
         <span>{bias}</span>
+        <InfoIcon className="size-3" />
+      </div>
+    );
+  } else if (variant === "sourcing") {
+    return (
+      <div
+        className={`flex items-center gap-1.5 ${getSourcingColor(sourcing)} text-clay-100 py-1 px-4 rounded-full`}
+        title={`Sourcing`}
+      >
+        <span>{sourcing}</span>
         <InfoIcon className="size-3" />
       </div>
     );
