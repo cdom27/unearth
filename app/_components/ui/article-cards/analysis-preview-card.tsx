@@ -32,7 +32,7 @@ export default function AnalysisPreviewCard({
           badge={
             <ArticleBadge
               variant="bias"
-              bias={preview.source.bias || "Mixed"}
+              value={preview.source.bias || "Mixed"}
             />
           }
           footerExtension={
