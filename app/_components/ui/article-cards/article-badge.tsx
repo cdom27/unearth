@@ -4,7 +4,7 @@ import InfoIcon from "../../icons/info";
 
 type ArticleBadgeProps =
   | { variant: "time"; timeStamp: string }
-  | { variant: "bias" | "sourcing" | "tone"; value: string };
+  | { variant: "bias" | "sourcing" | "tone" | "tf"; value: string };
 
 const BADGE_COLORS: Record<string, string> = {
   "lean left": "bg-left-500",
@@ -15,6 +15,8 @@ const BADGE_COLORS: Record<string, string> = {
   mixed: "bg-clay-600",
   "one sided": "bg-rating-low",
   negative: "bg-rating-low",
+  false: "bg-rating-low",
+  true: "bg-rating-very-high",
   "mostly one sided": "bg-rating-mixed text-clay-900",
   balanced: "bg-rating-very-high",
   positive: "bg-rating-very-high",
