@@ -20,8 +20,8 @@ export default function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-clay-900 text-clay-50 fixed bottom-0 inset-x-0 sm:hidden">
-      <ul className="grid grid-cols-3 justify-items-center">
+    <nav className="fixed inset-x-0 bottom-0 z-30 w-full max-w-full bg-clay-900 text-clay-50 sm:hidden">
+      <ul className="grid min-w-0 grid-cols-3 justify-items-center">
         {navLinks.map((link) => {
           const Icon = iconMap[link.label];
           const isActive = pathname === link.href;

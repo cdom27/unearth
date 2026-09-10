@@ -51,11 +51,13 @@ body {
     background: var(--color-clay-50);
     color: var(--color-clay-900);
     font-family: var(--font-sans);
+    overflow-x: clip;
 }
 
 html {
     scroll-behavior: smooth;
     scrollbar-gutter: stable;
+    overflow-x: clip;
 }
 
 #summary,
