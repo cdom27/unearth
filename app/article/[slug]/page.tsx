@@ -9,6 +9,7 @@ import InfoIcon from "@/app/_components/icons/info";
 import ArticleBadge from "@/app/_components/ui/article-cards/article-badge";
 import Table from "@/app/_components/ui/table/table";
 import CollapsibleTableRow from "@/app/_components/ui/table/collapsible-table-row";
+import ExplanationPopover from "@/app/_components/ui/tooltip/explanation-popover";
 
 export default async function AnalysisPage({
   params,
@@ -37,7 +38,7 @@ export default async function AnalysisPage({
       words[0].charAt(0).toUpperCase() +
       words[0].slice(1) +
       " " +
-      words.slice(1).join(" ")
+      words.slice(1).join(" ").trim()
     );
   }
 
@@ -75,31 +76,41 @@ export default async function AnalysisPage({
               Summary &amp; Insights
             </h2>
 
-            <div className="flex flex-col gap-6 justify-between w-2/3">
+            <div className="flex flex-col gap-12 justify-between w-2/3">
               {analysis.summary ? (
                 <>
                   <div className="flex flex-col gap-2">
-                    <h3
-                      className="font-bold flex items-center gap-1.5"
-                      id="general-summary"
+                    <ExplanationPopover
+                      content={`Neutral summaries are based on AI-assisted methods in an attempt to extract the core idea of the article.`}
+                      className="self-start"
                     >
-                      <span>Summary</span>
-                      <InfoIcon className="size-3.5 text-clay-500" />
-                    </h3>
+                      <h3
+                        className="font-bold flex items-center gap-1.5"
+                        id="general-summary"
+                      >
+                        <span>Summary</span>
+                        <InfoIcon className="size-3.5 text-clay-500" />
+                      </h3>
+                    </ExplanationPopover>
 
                     <p>{analysis.summary.tldr}</p>
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <h3
-                      className="font-bold flex items-center gap-1.5"
-                      id="key-insights"
+                    <ExplanationPopover
+                      content={`Insights are key extractions from the article that help you understand the report.`}
+                      className="self-start"
                     >
-                      <span>Key Insights</span>
-                      <InfoIcon className="size-3.5 text-clay-500" />
-                    </h3>
+                      <h3
+                        className="font-bold flex items-center gap-1.5"
+                        id="key-insights"
+                      >
+                        <span>Key Insights</span>
+                        <InfoIcon className="size-3.5 text-clay-500" />
+                      </h3>
+                    </ExplanationPopover>
 
-                    <ul className="flex flex-col gap-1.5">
+                    <ul className="flex flex-col gap-4">
                       {analysis.summary.insights.map((insight, index) => (
                         <li
                           key={index}
@@ -111,14 +122,19 @@ export default async function AnalysisPage({
                     </ul>
                   </div>
 
-                  <div className="flex flex-col gap-2">
-                    <h3
-                      className="font-bold flex items-center gap-1.5"
-                      id="direct-quotes"
+                  <div className="flex flex-col gap-4">
+                    <ExplanationPopover
+                      content={`Direct quotes are the exact words spoken by the speaker, or excerpts, in the article.`}
+                      className="self-start"
                     >
-                      <span>Direct Quotes</span>
-                      <InfoIcon className="size-3.5 text-clay-500" />
-                    </h3>
+                      <h3
+                        className="font-bold flex items-center gap-1.5"
+                        id="direct-quotes"
+                      >
+                        <span>Direct Quotes</span>
+                        <InfoIcon className="size-3.5 text-clay-500" />
+                      </h3>
+                    </ExplanationPopover>
 
                     {analysis.summary.quotes.map((quote, index) => (
                       <figure
@@ -244,10 +260,10 @@ export default async function AnalysisPage({
                       </li>
                       <li className="pl-4">
                         <a
-                          href="#sourcing-balance"
+                          href="#reporting-balance"
                           className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
                         >
-                          Sourcing Balance
+                          Reporting Balance
                         </a>
                       </li>
                       <li className="pl-4">
@@ -330,27 +346,42 @@ export default async function AnalysisPage({
                 </ol>
               </nav>
 
-              <div className="flex flex-col gap-2 w-full">
-                <h3
-                  className="font-bold flex items-center gap-1.5"
-                  title={`Bias Score (${analysis.biasScore}), Factual Score (${analysis.factualScore}), and Rhetorical Sentiment (${analysis.sentiment}) aim to evaluate an article's specific rhetoric and claims, NOT the source as a whole.`}
+              <div className="flex flex-col gap-2.5 w-full">
+                <ExplanationPopover
+                  className="self-start"
+                  content="Bias Score, Factual Score, and Rhetorical Sentiment are partially AI-assisted estimates of this article's framing, claims, and tone. They evaluate this article, not the source as a whole."
                 >
-                  <span>At a glance</span>
-                  <InfoIcon className="size-3.5 text-clay-500" />
-                </h3>
+                  <h3 className="font-bold flex items-center gap-1.5">
+                    <span>At a glance</span>
+
+                    <InfoIcon className="size-3.5 text-clay-500" />
+                  </h3>
+                </ExplanationPopover>
 
                 <div className="flex flex-col gap-6">
-                  <Scale
-                    value={analysis.biasScore || 0.5}
-                    scaleLabels={["Far Left", "Center", "Far Right"]}
-                    colors={["left-500", "clay-200", "right-500"]}
-                  />
+                  <div className="flex flex-col gap-0.5">
+                    <h4 className="text-sm">Bias Score</h4>
+                    <Scale
+                      value={analysis.biasScore || 0.5}
+                      scaleLabels={["Far Left", "Center", "Far Right"]}
+                      colors={["left-500", "clay-200", "right-500"]}
+                    />
+                  </div>
 
-                  <Scale
-                    value={analysis.factualScore || 0.5}
-                    scaleLabels={["Very Low", "Mixed", "Very High"]}
-                    colors={["rating-low", "rating-mixed", "rating-very-high"]}
-                  />
+                  <div className="flex flex-col gap-0.5">
+                    <h4 className="text-sm">
+                      Factual Score ({(analysis.factualScore || 0.5) * 100}%)
+                    </h4>
+                    <Scale
+                      value={analysis.factualScore || 0.5}
+                      scaleLabels={["Very Low", "Mixed", "Very High"]}
+                      colors={[
+                        "rating-low",
+                        "rating-mixed",
+                        "rating-very-high",
+                      ]}
+                    />
+                  </div>
 
                   <p>
                     Rhetorical Sentiment:{" "}
@@ -373,13 +404,18 @@ export default async function AnalysisPage({
             <>
               <div className="flex gap-16">
                 <div className="flex flex-col gap-2 py-2 border-r border-clay-200 pr-16">
-                  <h3
-                    className="font-bold flex items-center gap-1.5"
-                    id="narrative"
+                  <ExplanationPopover
+                    content={`The narrative is the story told by the author, reflecting their perspective and beliefs.`}
+                    className="self-start"
                   >
-                    <span>The Narrative</span>
-                    <InfoIcon className="size-3.5 text-clay-500" />
-                  </h3>
+                    <h3
+                      className="font-bold flex justify-between items-center gap-1.5"
+                      id="narrative"
+                    >
+                      <span>The Narrative</span>
+                      <InfoIcon className="size-3.5 text-clay-500" />
+                    </h3>
+                  </ExplanationPopover>
 
                   <p>{analysis.framing.narrative}</p>
                 </div>
@@ -387,10 +423,9 @@ export default async function AnalysisPage({
                 <div className="flex flex-col gap-2.5 py-2">
                   <h3
                     className="font-bold flex justify-between items-center gap-1.5"
-                    id="sourcing-balance"
+                    id="reporting-balance"
                   >
-                    <span>Sourcing Balance</span>
-
+                    <span>Reporting Balance</span>
                     <ArticleBadge
                       variant="sourcing"
                       value={formatValue(analysis.framing.sourcing.balance)}
@@ -537,12 +572,28 @@ export default async function AnalysisPage({
                                   grounding.citations
                                     .slice(0, 4)
                                     .map((cit, index) => (
-                                      <div
+                                      <ExplanationPopover
                                         key={index}
-                                        className="inline-block mr-0.5 text-clay-100 bg-clay-900 rounded-full text-sm size-5 text-center"
+                                        content={
+                                          <div className="flex flex-col gap-2">
+                                            {" "}
+                                            <span>Go to article:</span>{" "}
+                                            <span className="underline underline-offset-4">
+                                              {cit.title}
+                                            </span>
+                                          </div>
+                                        }
                                       >
-                                        {index + 1}
-                                      </div>
+                                        <a
+                                          href={`${cit.url}?ref=unearth.news`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          <div className="inline-block mr-0.5 text-clay-100 bg-clay-900 rounded-full text-sm size-5 text-center">
+                                            {index + 1}
+                                          </div>
+                                        </a>
+                                      </ExplanationPopover>
                                     )),
                                 )}
                             </li>
