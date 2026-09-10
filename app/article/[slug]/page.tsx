@@ -68,10 +68,10 @@ export default async function AnalysisPage({
 
   return (
     <>
-      <section className="m-4 sm:my-6 sm:mx-12 md:my-10 xl:my-16 2xl:my-22 pb-8 sm:pb-12 md:pb-16 xl:pb-22 2xl:pb-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-12 border-b border-clay-200">
+      <section className="m-4 sm:my-6 sm:mx-12 md:my-10 xl:my-16 2xl:my-22 pb-8 sm:pb-12 md:pb-16 xl:pb-22 2xl:pb-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-8 sm:gap-12 border-b border-clay-200">
         <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-1.5 text-sm">
               <span>Published {timeSince(article.publishedTime)} ago</span>
               <div className="size-1.5 bg-clay-900 rounded-full" />
               <span>Analyzed {timeSince(analysis.updatedAt)} ago</span>
@@ -80,9 +80,11 @@ export default async function AnalysisPage({
             <ShareActions articleTitle={article.title} shareUrl={shareUrl} />
           </div>
 
-          <h1 className="text-6xl lg:text-7xl font-serif">{article.title}</h1>
+          <h1 className="text-4xl leading-tight sm:text-5xl lg:text-7xl font-serif">
+            {article.title}
+          </h1>
 
-          <div className="flex items-center gap-1.5 text-sm">
+          <div className="flex flex-wrap items-center gap-1.5 text-sm">
             <span>{article.byline}</span>
             <div className="size-1.5 bg-clay-900 rounded-full" />
             <a
@@ -95,12 +97,12 @@ export default async function AnalysisPage({
             </a>
           </div>
 
-          <section className="flex mt-12 gap-16">
+          <section className="mt-8 flex flex-col gap-10 sm:mt-12 lg:flex-row lg:gap-16">
             <h2 className="sr-only" id="summary">
               Summary &amp; Insights
             </h2>
 
-            <div className="flex flex-col gap-12 justify-between w-2/3">
+            <div className="flex min-w-0 w-full flex-col gap-10 justify-between sm:gap-12 lg:w-2/3">
               {analysis.summary ? (
                 <>
                   <div className="flex flex-col gap-2">
@@ -138,7 +140,7 @@ export default async function AnalysisPage({
                       {analysis.summary.insights.map((insight, index) => (
                         <li
                           key={index}
-                          className="bg-clay-100 p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
+                          className="bg-clay-100 p-4 sm:p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
                         >
                           {insight}
                         </li>
@@ -163,7 +165,7 @@ export default async function AnalysisPage({
                     {analysis.summary.quotes.map((quote, index) => (
                       <figure
                         key={index}
-                        className="bg-clay-100 p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
+                        className="bg-clay-100 p-4 sm:p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
                       >
                         <blockquote>
                           <p className="text-2xl font-serif">
@@ -182,16 +184,16 @@ export default async function AnalysisPage({
               )}
             </div>
 
-            <div className="flex flex-col gap-6">
+            <div className="flex min-w-0 w-full flex-col gap-6 lg:w-1/3">
               <nav
                 id="article-table-of-contents"
-                className="self-end text-clay-150 bg-clay-900 p-8 rounded-sm border-clay-900 border flex flex-col gap-3 mt-6"
+                className="self-stretch text-clay-150 bg-clay-900 p-4 sm:p-8 rounded-sm border-clay-900 border flex flex-col gap-3 mt-0 lg:mt-6"
               >
-                <h3 className="font-bold text-center text-2xl">
+                <h3 className="font-bold text-center text-xl sm:text-2xl">
                   Table of Contents
                 </h3>
 
-                <article className="flex flex-col items-center gap-2 max-w-xs border-b border-clay-600 pb-6">
+                <article className="flex flex-col items-center gap-2 border-b border-clay-600 pb-6">
                   <Image
                     src={article.thumbnailUrl || Placeholder}
                     alt={article.title}
@@ -397,11 +399,11 @@ export default async function AnalysisPage({
           Rhetorical Analysis
         </h2>
 
-        <div className="flex flex-col gap-12">
+        <div className="flex flex-col gap-10 sm:gap-12">
           {analysis.framing ? (
             <>
-              <div className="flex gap-16">
-                <div className="flex flex-col gap-2 py-2 border-r border-clay-200 pr-16">
+              <div className="flex flex-col gap-8 lg:flex-row lg:gap-16">
+                <div className="flex flex-col gap-2 py-2 lg:border-r lg:border-clay-200 lg:pr-16 lg:w-1/2">
                   <ExplanationPopover
                     content={`The narrative is the story told by the author, reflecting their perspective and beliefs.`}
                     className="self-start"
@@ -418,7 +420,7 @@ export default async function AnalysisPage({
                   <p>{analysis.framing.narrative}</p>
                 </div>
 
-                <div className="flex flex-col gap-2.5 py-2">
+                <div className="flex flex-col gap-2.5 py-2 lg:w-1/2">
                   <h3
                     className="font-bold flex justify-between items-center gap-1.5"
                     id="reporting-balance"
@@ -525,13 +527,16 @@ export default async function AnalysisPage({
           Fact Check
         </h2>
 
-        <div className="grid grid-cols-2 gap-12" id="reported-claims">
+        <div
+          className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12"
+          id="reported-claims"
+        >
           {analysis.claims ? (
             <>
               {analysis.claims.map((claim, index) => (
                 <div
                   key={index}
-                  className={`flex flex-col gap-3 py-2 ${index % 2 != 0 && "pl-12 border-l border-clay-200"}`}
+                  className={`flex flex-col gap-3 py-2 ${index % 2 !== 0 ? "md:pl-12 md:border-l md:border-clay-200" : ""}`}
                 >
                   <p className="font-bold text-lg">
                     {index + 1}. {claim.content}
@@ -607,8 +612,6 @@ export default async function AnalysisPage({
           )}
         </div>
       </section>
-
-      <ArticleTimeline items={tableOfContentsItems} />
     </>
   );
 }
