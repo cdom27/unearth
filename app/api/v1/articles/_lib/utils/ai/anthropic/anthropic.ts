@@ -136,7 +136,11 @@ export async function anthropic(
   const anth = new Anthropic();
 
   const systemPrompt = await fs.readFile(
-    path.join(process.cwd(), "local", `${mode}.md`),
+    path.join(
+      process.cwd(),
+      "app/api/v1/articles/_lib/utils/ai/anthropic/prompts",
+      `${mode}.md`,
+    ),
     "utf-8",
   );
 

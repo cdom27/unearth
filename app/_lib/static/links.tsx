@@ -13,7 +13,7 @@ export const links = [
         label: "Email",
       },
       {
-        href: "https://github.com/cdom27/unearth",
+        href: "https://github.com/cdom27/unearth_news",
         label: "GitHub",
       },
       {

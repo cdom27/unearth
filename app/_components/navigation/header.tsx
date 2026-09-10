@@ -83,6 +83,7 @@ export default function Header() {
                           href={link.href}
                           onMouseEnter={() => setHoveredLink(link.href)}
                           onMouseLeave={() => setHoveredLink(null)}
+                          onClick={() => setIsOpen(false)}
                           className={`text-2xl w-full p-2 border-b border-clay-800 transition-colors duration-300 ${
                             isHovered
                               ? "text-brand-500"
