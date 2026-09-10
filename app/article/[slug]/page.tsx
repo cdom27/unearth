@@ -143,41 +143,12 @@ export default async function AnalysisPage({
             </div>
 
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2 w-full">
-                <h3
-                  className="font-bold flex items-center gap-1.5"
-                  title={`Bias Score (${analysis.biasScore}), Factual Score (${analysis.factualScore}), and Rhetorical Sentiment (${analysis.sentiment}) aim to evaluate an article's specific rhetoric and claims, NOT the source as a whole.`}
-                >
-                  <span>At a glance</span>
-                  <InfoIcon className="size-3.5 text-clay-500" />
-                </h3>
-
-                <div className="flex flex-col gap-6">
-                  <Scale
-                    value={analysis.biasScore || 0.5}
-                    scaleLabels={["Far Left", "Center", "Far Right"]}
-                    colors={["left-500", "clay-200", "right-500"]}
-                  />
-
-                  <Scale
-                    value={analysis.factualScore || 0.5}
-                    scaleLabels={["Very Low", "Mixed", "Very High"]}
-                    colors={["rating-low", "rating-mixed", "rating-very-high"]}
-                  />
-
-                  <p>
-                    Rhetorical Sentiment:{" "}
-                    <span className="font-bold">{formattedSentiment}</span>
-                  </p>
-                </div>
-              </div>
-
               <nav className="self-end text-clay-150 bg-clay-900 p-8 rounded-sm border-clay-900 border flex flex-col gap-3 mt-6">
                 <h3 className="font-bold text-center text-2xl">
                   Table of Contents
                 </h3>
 
-                <article className="flex flex-col items-center gap-2 max-w-xs border-b border-clay-600 pb-3">
+                <article className="flex flex-col items-center gap-2 max-w-xs border-b border-clay-600 pb-6">
                   <Image
                     src={article.thumbnailUrl || Placeholder}
                     alt={article.title}
@@ -188,7 +159,24 @@ export default async function AnalysisPage({
                   />
 
                   <div>
-                    <span className="font-bold">{article.title}</span>
+                    <p className="font-bold">{article.title}</p>
+
+                    <div className="flex flex-col pt-2 gap-2 text-sm">
+                      <span className="text-clay-400">
+                        Published {timeSince(article.publishedTime)} ago
+                      </span>
+
+                      <span>{article.byline}</span>
+
+                      <a
+                        href={`https://${source.url}?ref=unearth.news`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="self-start font-bold underline underline-offset-4 decoration-clay-200 hover:decoration-clay-400 transition-colors duration-300"
+                      >
+                        {source.name}
+                      </a>
+                    </div>
                   </div>
                 </article>
 
@@ -341,6 +329,35 @@ export default async function AnalysisPage({
                   </li>
                 </ol>
               </nav>
+
+              <div className="flex flex-col gap-2 w-full">
+                <h3
+                  className="font-bold flex items-center gap-1.5"
+                  title={`Bias Score (${analysis.biasScore}), Factual Score (${analysis.factualScore}), and Rhetorical Sentiment (${analysis.sentiment}) aim to evaluate an article's specific rhetoric and claims, NOT the source as a whole.`}
+                >
+                  <span>At a glance</span>
+                  <InfoIcon className="size-3.5 text-clay-500" />
+                </h3>
+
+                <div className="flex flex-col gap-6">
+                  <Scale
+                    value={analysis.biasScore || 0.5}
+                    scaleLabels={["Far Left", "Center", "Far Right"]}
+                    colors={["left-500", "clay-200", "right-500"]}
+                  />
+
+                  <Scale
+                    value={analysis.factualScore || 0.5}
+                    scaleLabels={["Very Low", "Mixed", "Very High"]}
+                    colors={["rating-low", "rating-mixed", "rating-very-high"]}
+                  />
+
+                  <p>
+                    Rhetorical Sentiment:{" "}
+                    <span className="font-bold">{formattedSentiment}</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </section>
         </div>
@@ -471,10 +488,12 @@ export default async function AnalysisPage({
         </div>
       </section>
 
-      <section className="m-4 sm:my-6 sm:mx-12 md:my-10 xl:my-16 2xl:my-28 pt-8 sm:pt-12 md:pt-16 xl:pt-22 2xl:pt-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-12 border-t border-clay-200">
+      <section className="m-4 sm:my-6 sm:mx-12 md:mt-10 xl:mt-16 2xl:mt-28 pt-8 sm:pt-12 md:pt-16 xl:pt-22 2xl:pt-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-2 border-t border-clay-200">
         <h2 className="font-serif text-4xl" id="fact-check">
           Fact Check
         </h2>
+
+        <p className="pb-4">something about something</p>
 
         <div className="grid grid-cols-2 gap-12">
           {analysis.claims ? (
