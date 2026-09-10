@@ -49,7 +49,7 @@ export default function ArticleTimeline({ items }: ArticleTimelineProps) {
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none fixed right-4 bottom-4 z-20 flex h-56 w-14 flex-col items-center justify-center gap-2 rounded-sm bg-clay-900 px-4 shadow-lg transition-opacity duration-300 ease-out sm:right-8 sm:bottom-8 ${
+      className={`pointer-events-none fixed right-4 bottom-4 z-20 hidden h-56 w-14 flex-col items-center justify-center gap-2 rounded-sm bg-clay-900 px-4 shadow-lg transition-opacity duration-300 ease-out sm:right-8 sm:bottom-8 2xl:flex ${
         timelineVisible ? "opacity-100" : "opacity-0"
       }`}
     >

@@ -612,6 +612,8 @@ export default async function AnalysisPage({
           )}
         </div>
       </section>
+
+      <ArticleTimeline items={tableOfContentsItems} />
     </>
   );
 }
