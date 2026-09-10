@@ -1,6 +1,7 @@
 import timeSince from "@/app/_lib/utils/timeSince";
 import ClockIcon from "../../icons/clock";
 import InfoIcon from "../../icons/info";
+import ExplanationPopover from "../tooltip/explanation-popover";
 
 type ArticleBadgeProps =
   | { variant: "time"; timeStamp: string }
@@ -23,8 +24,25 @@ const BADGE_COLORS: Record<string, string> = {
   neutral: "bg-clay-400",
 };
 
+function getPopoverContent(variant: string, value: string) {
+  if (variant === "bias") {
+    return `Source typically reports a bias of ${value}`;
+  } else if (variant === "sourcing") {
+    return `The reporting balance is determined through a partially AI-assited system where it evaluates the article's rhetoric.`;
+  } else if (variant === "tone") {
+    return `This term is used in a ${value} way within the report. Refer to the provided explantion for a deeper analysis.`;
+  } else if (variant === "tf") {
+    return `This claim has been determined ${value.trim()}. Refer to the sources and insights that aided this evaluation.`;
+  }
+  return value;
+}
+
 function getBadgeColor(value: string) {
-  const normalizedValue = value.trim().toLowerCase().replaceAll("-", " ");
+  const normalizedValue = value
+    .trim()
+    .toLowerCase()
+    .replaceAll("-", " ")
+    .trim();
   return BADGE_COLORS[normalizedValue] ?? "bg-clay-600";
 }
 
@@ -43,25 +61,14 @@ export default function ArticleBadge(props: ArticleBadgeProps) {
     );
   }
 
-  if (props.variant === "bias") {
-    return (
+  return (
+    <ExplanationPopover content={getPopoverContent(props.variant, props.value)}>
       <div
         className={`flex items-center gap-1.5 ${getBadgeColor(props.value)} text-clay-100 py-1 px-4 rounded-full`}
-        title={`Source typically leans ${props.value}`}
       >
         <span>{props.value}</span>
         <InfoIcon className="size-3" />
       </div>
-    );
-  }
-
-  return (
-    <div
-      className={`flex items-center gap-1.5 ${getBadgeColor(props.value)} text-clay-100 py-1 px-4 rounded-full`}
-      title={props.variant === "tone" ? "Term tone" : "Sourcing"}
-    >
-      <span>{props.value}</span>
-      <InfoIcon className="size-3" />
-    </div>
+    </ExplanationPopover>
   );
 }

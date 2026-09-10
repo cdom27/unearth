@@ -41,7 +41,12 @@ export default function ExplanationPopover({
   }
 
   function handleMouseLeave(event: MouseEvent<HTMLSpanElement>) {
-    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+    const relatedTarget = event.relatedTarget;
+
+    if (
+      !(relatedTarget instanceof Node) ||
+      !event.currentTarget.contains(relatedTarget)
+    ) {
       setIsOpen(false);
     }
   }
@@ -70,7 +75,7 @@ export default function ExplanationPopover({
         id={descriptionId}
         role="tooltip"
         aria-hidden={!isOpen}
-        className={`absolute bottom-full left-1/2 z-20 mb-4 w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 rounded-sm bg-clay-800 px-6 py-5 text-left text-sm font-normal leading-relaxed text-clay-50 shadow-lg transition-opacity duration-200 ${
+        className={`absolute bottom-full left-1/2 z-20 mb-4 w-80 -translate-x-1/2 rounded-sm bg-clay-800 px-6 py-5 text-left text-sm font-normal leading-relaxed text-clay-50 normal-case shadow-lg transition-opacity duration-200 ${
           isOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
