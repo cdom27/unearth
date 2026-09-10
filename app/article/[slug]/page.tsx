@@ -10,6 +10,9 @@ import ArticleBadge from "@/app/_components/ui/article-cards/article-badge";
 import Table from "@/app/_components/ui/table/table";
 import CollapsibleTableRow from "@/app/_components/ui/table/collapsible-table-row";
 import ExplanationPopover from "@/app/_components/ui/tooltip/explanation-popover";
+import ArticleTimeline, {
+  TableOfContentsItem,
+} from "./_components/article-timeline";
 
 export default async function AnalysisPage({
   params,
@@ -23,6 +26,27 @@ export default async function AnalysisPage({
 
   const { article, analysis, source } = analysisDetails;
   const shareUrl = `https://unearth.news/article/${slug}`;
+  const tableOfContentsItems: TableOfContentsItem[] = [
+    { id: "summary", label: "Summary", main: true },
+    ...(analysis.summary
+      ? [
+          { id: "general-summary", label: "General Summary" },
+          { id: "key-insights", label: "Key Insights" },
+          { id: "direct-quotes", label: "Direct Quotes" },
+        ]
+      : []),
+    { id: "rhetorical-analysis", label: "Rhetorical Analysis", main: true },
+    ...(analysis.framing
+      ? [
+          { id: "narrative", label: "Narrative" },
+          { id: "reporting-balance", label: "Reporting Balance" },
+          { id: "term-analysis", label: "Term Analysis" },
+          { id: "rhetorical-devices", label: "Rhetorical Devices" },
+        ]
+      : []),
+    { id: "fact-check", label: "Fact Check", main: true },
+    { id: "reported-claims", label: "Reported Claims" },
+  ];
 
   let formattedSentiment = "Unverified";
 
@@ -159,7 +183,10 @@ export default async function AnalysisPage({
             </div>
 
             <div className="flex flex-col gap-6">
-              <nav className="self-end text-clay-150 bg-clay-900 p-8 rounded-sm border-clay-900 border flex flex-col gap-3 mt-6">
+              <nav
+                id="article-table-of-contents"
+                className="self-end text-clay-150 bg-clay-900 p-8 rounded-sm border-clay-900 border flex flex-col gap-3 mt-6"
+              >
                 <h3 className="font-bold text-center text-2xl">
                   Table of Contents
                 </h3>
@@ -207,36 +234,36 @@ export default async function AnalysisPage({
                           Summary
                         </a>
                       </li>
-                      <li className="pl-4">
-                        <a
-                          href="#general-summary"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          General Summary
-                        </a>
-                      </li>
-                      <li className="pl-4">
-                        <a
-                          href="key-insights"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Key Insights{" "}
-                          {analysis.summary && (
-                            <span>({analysis.summary.insights.length})</span>
-                          )}
-                        </a>
-                      </li>
-                      <li className="pl-4">
-                        <a
-                          href="#direct-quotes"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Direct Quotes{" "}
-                          {analysis.summary && (
-                            <span>({analysis.summary.quotes.length})</span>
-                          )}
-                        </a>
-                      </li>
+                      {analysis.summary && (
+                        <>
+                          <li className="pl-4">
+                            <a
+                              href="#general-summary"
+                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                            >
+                              General Summary
+                            </a>
+                          </li>
+                          <li className="pl-4">
+                            <a
+                              href="#key-insights"
+                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                            >
+                              Key Insights{" "}
+                              <span>({analysis.summary.insights.length})</span>
+                            </a>
+                          </li>
+                          <li className="pl-4">
+                            <a
+                              href="#direct-quotes"
+                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                            >
+                              Direct Quotes{" "}
+                              <span>({analysis.summary.quotes.length})</span>
+                            </a>
+                          </li>
+                        </>
+                      )}
                     </ol>
                   </li>
 
@@ -250,44 +277,44 @@ export default async function AnalysisPage({
                           Rhetorical Analysis
                         </a>
                       </li>
-                      <li className="pl-4">
-                        <a
-                          href="#narrative"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Narrative
-                        </a>
-                      </li>
-                      <li className="pl-4">
-                        <a
-                          href="#reporting-balance"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Reporting Balance
-                        </a>
-                      </li>
-                      <li className="pl-4">
-                        <a
-                          href="#term-analysis"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Term Analysis{" "}
-                          {analysis.framing && (
-                            <span>({analysis.framing.terms.length})</span>
-                          )}
-                        </a>
-                      </li>
-                      <li className="pl-4">
-                        <a
-                          href="#rhetorical-devices"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Rhetorical Devices{" "}
-                          {analysis.framing && (
-                            <span>({analysis.framing.devices.length})</span>
-                          )}
-                        </a>
-                      </li>
+                      {analysis.framing && (
+                        <>
+                          <li className="pl-4">
+                            <a
+                              href="#narrative"
+                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                            >
+                              Narrative
+                            </a>
+                          </li>
+                          <li className="pl-4">
+                            <a
+                              href="#reporting-balance"
+                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                            >
+                              Reporting Balance
+                            </a>
+                          </li>
+                          <li className="pl-4">
+                            <a
+                              href="#term-analysis"
+                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                            >
+                              Term Analysis{" "}
+                              <span>({analysis.framing.terms.length})</span>
+                            </a>
+                          </li>
+                          <li className="pl-4">
+                            <a
+                              href="#rhetorical-devices"
+                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                            >
+                              Rhetorical Devices{" "}
+                              <span>({analysis.framing.devices.length})</span>
+                            </a>
+                          </li>
+                        </>
+                      )}
                     </ol>
                   </li>
 
@@ -303,7 +330,7 @@ export default async function AnalysisPage({
                       </li>
                       <li className="pl-4">
                         <a
-                          href="#fact-check"
+                          href="#reported-claims"
                           className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
                         >
                           Reported Claims{" "}
@@ -315,34 +342,6 @@ export default async function AnalysisPage({
                     </ol>
                   </li>
 
-                  <li>
-                    <ol>
-                      <li className="font-bold text-lg">
-                        <a
-                          href="#related-articles"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Related Articles
-                        </a>
-                      </li>
-                      <li className="pl-4">
-                        <a
-                          href="#original-article"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Original Article
-                        </a>
-                      </li>
-                      <li className="pl-4">
-                        <a
-                          href="#more-articles"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          More Articles
-                        </a>
-                      </li>
-                    </ol>
-                  </li>
                 </ol>
               </nav>
 
@@ -527,7 +526,7 @@ export default async function AnalysisPage({
           Fact Check
         </h2>
 
-        <div className="grid grid-cols-2 gap-12">
+        <div className="grid grid-cols-2 gap-12" id="reported-claims">
           {analysis.claims ? (
             <>
               {analysis.claims.map((claim, index) => (
@@ -609,6 +608,8 @@ export default async function AnalysisPage({
           )}
         </div>
       </section>
+
+      <ArticleTimeline items={tableOfContentsItems} />
     </>
   );
 }
