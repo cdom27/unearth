@@ -437,11 +437,9 @@ export default async function AnalysisPage({
               </div>
 
               <div className="flex flex-col gap-2">
-                <h3 className="font-serif text-3xl" id="term-analysis">
+                <h3 className="font-serif text-3xl pb-4" id="term-analysis">
                   Term Analysis
                 </h3>
-
-                <p className="pb-4">something about something</p>
 
                 <Table
                   caption="Term analysis"
@@ -479,11 +477,12 @@ export default async function AnalysisPage({
               </div>
 
               <div className="flex flex-col gap-2">
-                <h3 className="font-serif text-3xl" id="rhetorical-devices">
+                <h3
+                  className="font-serif text-3xl pb-4"
+                  id="rhetorical-devices"
+                >
                   Rhetorical Devices
                 </h3>
-
-                <p className="pb-4">something about something</p>
 
                 <Table
                   caption="Rhetorical Devices"
@@ -527,8 +526,6 @@ export default async function AnalysisPage({
         <h2 className="font-serif text-4xl" id="fact-check">
           Fact Check
         </h2>
-
-        <p className="pb-4">something about something</p>
 
         <div className="grid grid-cols-2 gap-12">
           {analysis.claims ? (
