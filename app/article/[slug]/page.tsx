@@ -330,7 +330,7 @@ export default async function AnalysisPage({
                       </li>
                       <li className="pl-4">
                         <a
-                          href="#reported-claims"
+                          href="#fact-check"
                           className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
                         >
                           Reported Claims{" "}
@@ -341,7 +341,6 @@ export default async function AnalysisPage({
                       </li>
                     </ol>
                   </li>
-
                 </ol>
               </nav>
 

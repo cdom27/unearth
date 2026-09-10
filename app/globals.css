@@ -54,5 +54,19 @@ body {
 }
 
 html {
+    scroll-behavior: smooth;
     scrollbar-gutter: stable;
+}
+
+#summary,
+#general-summary,
+#key-insights,
+#direct-quotes,
+#rhetorical-analysis,
+#narrative,
+#reporting-balance,
+#term-analysis,
+#rhetorical-devices,
+#fact-check {
+    scroll-margin-top: 2rem;
 }
