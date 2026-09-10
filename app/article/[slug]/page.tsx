@@ -575,7 +575,10 @@ export default async function AnalysisPage({
                                       <ExplanationPopover
                                         key={index}
                                         content={
-                                          <div className="flex flex-col gap-2">
+                                          <div
+                                            className="flex flex-col gap-2"
+                                            key={index}
+                                          >
                                             {" "}
                                             <span>Go to article:</span>{" "}
                                             <span className="underline underline-offset-4">
