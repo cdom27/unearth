@@ -62,7 +62,7 @@ export default function ExplanationPopover({
         aria-label="Show explanation"
         aria-expanded={isOpen}
         aria-describedby={isOpen ? descriptionId : undefined}
-        className="inline-flex cursor-help rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clay-500"
+        className="inline-flex rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clay-500"
         onClick={() => setIsOpen((open) => !open)}
         onFocus={() => setIsOpen(true)}
         onBlur={handleBlur}
