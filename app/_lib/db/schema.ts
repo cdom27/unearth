@@ -10,6 +10,10 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import type { Claim } from "@/app/api/v1/articles/_lib/types/claim";
+import type { FramingDTO } from "@/app/api/v1/articles/_lib/dtos/framing";
+import type { SummaryDTO } from "@/app/api/v1/articles/_lib/dtos/summary";
+import type { ClaimVerificationDTO } from "@/app/api/v1/articles/_lib/dtos/claim-verification";
 
 export const analysisTaskStatusEnum = pgEnum("analysis_task_status", [
   "pending",
@@ -72,10 +76,12 @@ export const analyses = pgTable("analyses", {
     .unique()
     .references(() => articles.id, { onDelete: "cascade" }),
   slug: text("slug").notNull().unique(),
-  summary: jsonb("summary"),
+  summary: jsonb("summary").$type<SummaryDTO | null>(),
   sentiment: text("sentiment"),
-  framing: jsonb("framing"),
-  claims: jsonb("claims"),
+  framing: jsonb("framing").$type<FramingDTO | null>(),
+  claims: jsonb("claims").$type<
+    (Claim & { verification: ClaimVerificationDTO | null })[] | null
+  >(),
   meta: jsonb("meta").notNull(),
   factualScore: doublePrecision("factual_score"),
   biasScore: doublePrecision("bias_score"),

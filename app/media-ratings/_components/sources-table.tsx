@@ -3,6 +3,7 @@
 import useSources from "@/app/_hooks/use-sources";
 import Search from "@/app/_components/ui/forms/search";
 import ArticleBadge from "@/app/_components/ui/article-cards/article-badge";
+import Table from "@/app/_components/ui/table/table";
 import { useMediaRatings } from "./media-ratings-provider";
 import SourcesTableSkeleton from "./sources-table-skeleton";
 
@@ -41,94 +42,82 @@ export default function SourcesTable() {
         buttonLabel="Search Sources"
       />
 
-      <div
-        className="overflow-x-auto border border-clay-200 rounded-md"
-        aria-busy={isFetching}
+      <Table
+        caption="Media source ratings"
+        columns={[
+          { label: "Source" },
+          { label: "Bias" },
+          { label: "Factual reporting" },
+          { label: "Credibility" },
+          { label: "Country" },
+          { label: "Media type" },
+        ]}
+        ariaBusy={isFetching}
+        footer={
+          <>
+            {!isFetching && sources.length === 0 && (
+              <p className="p-8 text-center text-clay-500">
+                {search ? "No sources match your search." : "No sources found."}
+              </p>
+            )}
+            {isFetching && (
+              <p
+                className="p-8 text-center text-clay-500"
+                role="status"
+                aria-live="polite"
+              >
+                Fetching sources...
+              </p>
+            )}
+          </>
+        }
       >
-        <table className="w-full min-w-212.5 border-collapse text-left">
-          <caption className="sr-only">Media source ratings</caption>
-          <thead className="bg-clay-150 text-sm">
-            <tr>
-              {[
-                "Source",
-                "Bias",
-                "Factual reporting",
-                "Credibility",
-                "Country",
-                "Media type",
-              ].map((heading) => (
-                <th
-                  key={heading}
-                  scope="col"
-                  className="px-4 py-4 font-semibold"
-                >
-                  {heading}
+        {isFetching && sources.length === 0 ? (
+          <SourcesTableSkeleton />
+        ) : (
+          <tbody>
+            {sources.map((source) => (
+              <tr key={source.id} className="border-t border-clay-200">
+                <th scope="row" className="px-4 py-4 font-semibold">
+                  <div className="flex flex-col gap-1">
+                    <span>{source.name}</span>
+                    <a
+                      href={`${sourceHref(source.url)}?ref=unearth.news`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm text-clay-500 hover:underline"
+                    >
+                      {source.url}
+                    </a>
+                  </div>
                 </th>
-              ))}
-            </tr>
-          </thead>
-          {isFetching && sources.length === 0 ? (
-            <SourcesTableSkeleton />
-          ) : (
-            <tbody>
-              {sources.map((source) => (
-                <tr key={source.id} className="border-t border-clay-200">
-                  <th scope="row" className="px-4 py-4 font-semibold">
-                    <div className="flex flex-col gap-1">
-                      <span>{source.name}</span>
-                      <a
-                        href={`${sourceHref(source.url)}?ref=unearth.news`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm text-clay-500 hover:underline"
-                      >
-                        {source.url}
-                      </a>
+                <td className="px-4 py-4">
+                  {source.bias ? (
+                    <div className="flex">
+                      <ArticleBadge
+                        variant="bias"
+                        value={normalizeBias(source.bias)}
+                      />
                     </div>
-                  </th>
-                  <td className="px-4 py-4">
-                    {source.bias ? (
-                      <div className="flex">
-                        <ArticleBadge
-                          variant="bias"
-                          bias={normalizeBias(source.bias)}
-                        />
-                      </div>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td className="px-4 py-4">
-                    {displayValue(source.factualReporting)}
-                  </td>
-                  <td className="px-4 py-4">
-                    {displayValue(source.credibility)}
-                  </td>
-                  <td className="px-4 py-4">{displayValue(source.country)}</td>
-                  <td className="px-4 py-4">
-                    {displayValue(source.mediaType)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          )}
-        </table>
-
-        {!isFetching && sources.length === 0 && (
-          <p className="p-8 text-center text-clay-500">
-            {search ? "No sources match your search." : "No sources found."}
-          </p>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td className="px-4 py-4">
+                  {displayValue(source.factualReporting)}
+                </td>
+                <td className="px-4 py-4">
+                  {displayValue(source.credibility)}
+                </td>
+                <td className="px-4 py-4">{displayValue(source.country)}</td>
+                <td className="px-4 py-4">
+                  {displayValue(source.mediaType)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
         )}
-        {isFetching && (
-          <p
-            className="p-8 text-center text-clay-500"
-            role="status"
-            aria-live="polite"
-          >
-            Fetching sources...
-          </p>
-        )}
-      </div>
+      </Table>
 
       <div className="flex flex-col gap-4 items-center sm:flex-row sm:justify-between">
         <p className="text-sm text-clay-500">

@@ -43,12 +43,13 @@ export default function SideMenu({
         aria-modal="true"
         aria-label="Navigation menu"
         aria-hidden={!open}
-        className={`bg-clay-900 text-clay-50 fixed w-[320px] p-4 sm:py-6 flex flex-col gap-4 inset-0 z-20 transition-transform duration-500 ${open ? "translate-0" : "-translate-x-full"}`}
+        className={`bg-clay-900 text-clay-50 fixed w-full max-w-80 p-4 sm:py-6 flex flex-col gap-4 inset-0 z-20 transition-transform duration-500 ${open ? "translate-0" : "-translate-x-full"}`}
       >
         <div className="flex justify-between items-center pb-4 border-b border-clay-800">
           <Link
             href="/"
             className="flex items-center gap-2 text-xl font-semibold"
+            onClick={() => setOpen(false)}
           >
             <LogoIcon className="size-9 bg-clay-50 text-clay-900 p-1 rounded-xs" />{" "}
             <span className="font-serif text-3xl">Unearth</span>
