@@ -54,7 +54,7 @@ export default function ShareActions({
       <Tooltip content="Share on Site">
         <button
           type="button"
-          className="hover:cursor-pointer"
+          className="inline-flex items-center justify-center leading-none hover:cursor-pointer"
           onClick={() => void navigator.clipboard.writeText(shareUrl)}
           aria-label="Share on Site"
         >

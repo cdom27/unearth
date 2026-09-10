@@ -49,7 +49,7 @@ export default function Tooltip({
   return (
     <>
       <span
-        className="inline-block"
+        className="inline-block leading-none"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
