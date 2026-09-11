@@ -102,7 +102,7 @@ export default async function AnalysisPage({
               Summary &amp; Insights
             </h2>
 
-            <div className="flex min-w-0 w-full flex-col gap-10 justify-between sm:gap-12 lg:w-2/3">
+            <div className="flex min-w-0 w-full flex-col gap-10 sm:gap-12 lg:w-2/3">
               {analysis.summary ? (
                 <>
                   <div className="flex flex-col gap-2">
