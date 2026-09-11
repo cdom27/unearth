@@ -13,6 +13,7 @@ import ExplanationPopover from "@/app/_components/ui/tooltip/explanation-popover
 import ArticleTimeline, {
   TableOfContentsItem,
 } from "./_components/article-timeline";
+import ExpandableContent from "./_components/expandable-content";
 
 export default async function AnalysisPage({
   params,
@@ -26,26 +27,49 @@ export default async function AnalysisPage({
 
   const { article, analysis, source } = analysisDetails;
   const shareUrl = `https://unearth.news/article/${slug}`;
+  const hasText = (value: string | null | undefined): value is string =>
+    Boolean(value?.trim());
+  const hasInsights = Boolean(analysis.summary?.insights.length);
+  const hasQuotes = Boolean(analysis.summary?.quotes.length);
+  const hasNarrative = hasText(analysis.framing?.narrative);
+  const hasBalance = Boolean(
+    analysis.framing?.sourcing?.balance ||
+      hasText(analysis.framing?.sourcing?.notes),
+  );
+  const hasTerms = Boolean(analysis.framing?.terms.length);
+  const hasDevices = Boolean(analysis.framing?.devices.length);
+  const hasClaims = Boolean(analysis.claims?.length);
+  const hasValidScore = (value: number | null) =>
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= 0 &&
+    value <= 1;
+  const biasScore = hasValidScore(analysis.biasScore)
+    ? analysis.biasScore
+    : null;
+  const factualScore = hasValidScore(analysis.factualScore)
+    ? analysis.factualScore
+    : null;
   const tableOfContentsItems: TableOfContentsItem[] = [
     { id: "summary", label: "Summary", main: true },
-    ...(analysis.summary
-      ? [
-          { id: "general-summary", label: "General Summary" },
-          { id: "key-insights", label: "Key Insights" },
-          { id: "direct-quotes", label: "Direct Quotes" },
-        ]
+    ...(hasText(analysis.summary?.tldr)
+      ? [{ id: "general-summary", label: "General Summary" }]
       : []),
+    ...(hasInsights
+      ? [{ id: "key-insights", label: "Key Insights" }]
+      : []),
+    ...(hasQuotes ? [{ id: "direct-quotes", label: "Direct Quotes" }] : []),
     { id: "rhetorical-analysis", label: "Rhetorical Analysis", main: true },
-    ...(analysis.framing
-      ? [
-          { id: "narrative", label: "Narrative" },
-          { id: "reporting-balance", label: "Reporting Balance" },
-          { id: "term-analysis", label: "Term Analysis" },
-          { id: "rhetorical-devices", label: "Rhetorical Devices" },
-        ]
+    ...(hasNarrative ? [{ id: "narrative", label: "Narrative" }] : []),
+    ...(hasBalance
+      ? [{ id: "reporting-balance", label: "Reporting Balance" }]
+      : []),
+    ...(hasTerms ? [{ id: "term-analysis", label: "Term Analysis" }] : []),
+    ...(hasDevices
+      ? [{ id: "rhetorical-devices", label: "Rhetorical Devices" }]
       : []),
     { id: "fact-check", label: "Fact Check", main: true },
-    { id: "reported-claims", label: "Reported Claims" },
+    ...(hasClaims ? [{ id: "reported-claims", label: "Reported Claims" }] : []),
   ];
 
   let formattedSentiment = "Unverified";
@@ -102,10 +126,9 @@ export default async function AnalysisPage({
               Summary &amp; Insights
             </h2>
 
-            <div className="flex min-w-0 w-full flex-col gap-10 sm:gap-12 lg:w-2/3">
-              {analysis.summary ? (
-                <>
-                  <div className="flex flex-col gap-2">
+            <div className="flex min-w-0 w-full flex-col gap-10 sm:gap-12 lg:sticky lg:top-6 lg:self-start lg:w-2/3">
+              <>
+                <div className="flex flex-col gap-2">
                     <ExplanationPopover
                       content={`Neutral summaries are based on AI-assisted methods in an attempt to extract the core idea of the article.`}
                       className="self-start"
@@ -119,9 +142,14 @@ export default async function AnalysisPage({
                       </h3>
                     </ExplanationPopover>
 
-                    <p>{analysis.summary.tldr}</p>
+                    {hasText(analysis.summary?.tldr) ? (
+                      <p>{analysis.summary.tldr}</p>
+                    ) : (
+                      <p className="text-clay-500">Not available</p>
+                    )}
                   </div>
 
+                {hasInsights && analysis.summary ? (
                   <div className="flex flex-col gap-2">
                     <ExplanationPopover
                       content={`Insights are key extractions from the article that help you understand the report.`}
@@ -136,18 +164,20 @@ export default async function AnalysisPage({
                       </h3>
                     </ExplanationPopover>
 
-                    <ul className="flex flex-col gap-4">
+                    <ExpandableContent>
                       {analysis.summary.insights.map((insight, index) => (
-                        <li
+                        <div
                           key={index}
                           className="bg-clay-100 p-4 sm:p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
                         >
                           {insight}
-                        </li>
+                        </div>
                       ))}
-                    </ul>
+                    </ExpandableContent>
                   </div>
+                ) : null}
 
+                {hasQuotes && analysis.summary ? (
                   <div className="flex flex-col gap-4">
                     <ExplanationPopover
                       content={`Direct quotes are the exact words spoken by the speaker, or excerpts, in the article.`}
@@ -162,26 +192,38 @@ export default async function AnalysisPage({
                       </h3>
                     </ExplanationPopover>
 
-                    {analysis.summary.quotes.map((quote, index) => (
-                      <figure
-                        key={index}
-                        className="bg-clay-100 p-4 sm:p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
-                      >
-                        <blockquote>
-                          <p className="text-2xl font-serif">
-                            &ldquo;{quote.text}&rdquo;
-                          </p>
-                        </blockquote>
-                        <figcaption className="italic ml-auto">
-                          &mdash; {quote.speaker}
-                        </figcaption>
-                      </figure>
-                    ))}
+                    <ExpandableContent>
+                      {analysis.summary.quotes.map((quote, index) => (
+                        <figure
+                          key={index}
+                          className="bg-clay-100 p-4 sm:p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
+                        >
+                          <blockquote>
+                            {hasText(quote.text) ? (
+                              <p className="text-2xl font-serif">
+                                &ldquo;{quote.text}&rdquo;
+                              </p>
+                            ) : (
+                              <p className="text-clay-500">
+                                Quote not available
+                              </p>
+                            )}
+                          </blockquote>
+                          {hasText(quote.speaker) ? (
+                            <figcaption className="italic ml-auto">
+                              &mdash; {quote.speaker}
+                            </figcaption>
+                          ) : (
+                            <figcaption className="italic ml-auto text-clay-500">
+                              Speaker not available
+                            </figcaption>
+                          )}
+                        </figure>
+                      ))}
+                    </ExpandableContent>
                   </div>
-                </>
-              ) : (
-                <span>missing skeleton</span>
-              )}
+                ) : null}
+              </>
             </div>
 
             <div className="flex min-w-0 w-full flex-col gap-6 lg:w-1/3">
@@ -236,17 +278,19 @@ export default async function AnalysisPage({
                           Summary
                         </a>
                       </li>
-                      {analysis.summary && (
+                      {hasText(analysis.summary?.tldr) ||
+                      hasInsights ||
+                      hasQuotes ? (
                         <>
-                          <li className="pl-4">
+                          {hasText(analysis.summary?.tldr) && <li className="pl-4">
                             <a
                               href="#general-summary"
                               className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
                             >
                               General Summary
                             </a>
-                          </li>
-                          <li className="pl-4">
+                          </li>}
+                          {hasInsights && analysis.summary && <li className="pl-4">
                             <a
                               href="#key-insights"
                               className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
@@ -254,8 +298,8 @@ export default async function AnalysisPage({
                               Key Insights{" "}
                               <span>({analysis.summary.insights.length})</span>
                             </a>
-                          </li>
-                          <li className="pl-4">
+                          </li>}
+                          {hasQuotes && analysis.summary && <li className="pl-4">
                             <a
                               href="#direct-quotes"
                               className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
@@ -263,9 +307,9 @@ export default async function AnalysisPage({
                               Direct Quotes{" "}
                               <span>({analysis.summary.quotes.length})</span>
                             </a>
-                          </li>
+                          </li>}
                         </>
-                      )}
+                      ) : null}
                     </ol>
                   </li>
 
@@ -279,25 +323,25 @@ export default async function AnalysisPage({
                           Rhetorical Analysis
                         </a>
                       </li>
-                      {analysis.framing && (
+                      {(hasNarrative || hasBalance || hasTerms || hasDevices) && (
                         <>
-                          <li className="pl-4">
+                          {hasNarrative && <li className="pl-4">
                             <a
                               href="#narrative"
                               className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
                             >
                               Narrative
                             </a>
-                          </li>
-                          <li className="pl-4">
+                          </li>}
+                          {hasBalance && <li className="pl-4">
                             <a
                               href="#reporting-balance"
                               className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
                             >
                               Reporting Balance
                             </a>
-                          </li>
-                          <li className="pl-4">
+                          </li>}
+                          {hasTerms && analysis.framing && <li className="pl-4">
                             <a
                               href="#term-analysis"
                               className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
@@ -305,8 +349,8 @@ export default async function AnalysisPage({
                               Term Analysis{" "}
                               <span>({analysis.framing.terms.length})</span>
                             </a>
-                          </li>
-                          <li className="pl-4">
+                          </li>}
+                          {hasDevices && analysis.framing && <li className="pl-4">
                             <a
                               href="#rhetorical-devices"
                               className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
@@ -314,7 +358,7 @@ export default async function AnalysisPage({
                               Rhetorical Devices{" "}
                               <span>({analysis.framing.devices.length})</span>
                             </a>
-                          </li>
+                          </li>}
                         </>
                       )}
                     </ol>
@@ -336,8 +380,8 @@ export default async function AnalysisPage({
                           className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
                         >
                           Reported Claims{" "}
-                          {analysis.claims && (
-                            <span>({analysis.claims.length})</span>
+                          {hasClaims && (
+                            <span>({analysis.claims?.length})</span>
                           )}
                         </a>
                       </li>
@@ -361,26 +405,37 @@ export default async function AnalysisPage({
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col gap-0.5">
                     <h4 className="text-sm">Bias Score</h4>
-                    <Scale
-                      value={analysis.biasScore || 0.5}
-                      scaleLabels={["Far Left", "Center", "Far Right"]}
-                      colors={["left-500", "clay-200", "right-500"]}
-                    />
+                    {biasScore !== null ? (
+                      <Scale
+                        value={biasScore}
+                        scaleLabels={["Far Left", "Center", "Far Right"]}
+                        colors={["left-500", "clay-200", "right-500"]}
+                      />
+                    ) : (
+                      <p className="text-clay-500">Not available</p>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-0.5">
                     <h4 className="text-sm">
-                      Factual Score ({(analysis.factualScore || 0.5) * 100}%)
+                      Factual Score{" "}
+                      {factualScore !== null
+                        ? `(${factualScore * 100}%)`
+                        : "(Not available)"}
                     </h4>
-                    <Scale
-                      value={analysis.factualScore || 0.5}
-                      scaleLabels={["Very Low", "Mixed", "Very High"]}
-                      colors={[
-                        "rating-low",
-                        "rating-mixed",
-                        "rating-very-high",
-                      ]}
-                    />
+                    {factualScore !== null ? (
+                      <Scale
+                        value={factualScore}
+                        scaleLabels={["Very Low", "Mixed", "Very High"]}
+                        colors={[
+                          "rating-low",
+                          "rating-mixed",
+                          "rating-very-high",
+                        ]}
+                      />
+                    ) : (
+                      <p className="text-clay-500">Not available</p>
+                    )}
                   </div>
 
                   <p>
@@ -417,7 +472,11 @@ export default async function AnalysisPage({
                     </h3>
                   </ExplanationPopover>
 
-                  <p>{analysis.framing.narrative}</p>
+                  {hasNarrative ? (
+                    <p>{analysis.framing.narrative}</p>
+                  ) : (
+                    <p className="text-clay-500">Not available</p>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2.5 py-2 lg:w-1/2">
@@ -426,17 +485,25 @@ export default async function AnalysisPage({
                     id="reporting-balance"
                   >
                     <span>Reporting Balance</span>
-                    <ArticleBadge
-                      variant="sourcing"
-                      value={formatValue(analysis.framing.sourcing.balance)}
-                    />
+                    {analysis.framing.sourcing?.balance ? (
+                      <ArticleBadge
+                        variant="sourcing"
+                        value={formatValue(analysis.framing.sourcing.balance)}
+                      />
+                    ) : (
+                      <span className="text-clay-500">Not available</span>
+                    )}
                   </h3>
 
-                  <p>{analysis.framing.sourcing.notes}</p>
+                  {hasText(analysis.framing.sourcing?.notes) ? (
+                    <p>{analysis.framing.sourcing.notes}</p>
+                  ) : (
+                    <p className="text-clay-500">Not available</p>
+                  )}
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
+              {hasTerms ? <div className="flex flex-col gap-2">
                 <h3 className="font-serif text-3xl pb-4" id="term-analysis">
                   Term Analysis
                 </h3>
@@ -474,9 +541,9 @@ export default async function AnalysisPage({
                     ))}
                   </tbody>
                 </Table>
-              </div>
+              </div> : null}
 
-              <div className="flex flex-col gap-2">
+              {hasDevices ? <div className="flex flex-col gap-2">
                 <h3
                   className="font-serif text-3xl pb-4"
                   id="rhetorical-devices"
@@ -514,10 +581,10 @@ export default async function AnalysisPage({
                     ))}
                   </tbody>
                 </Table>
-              </div>
+              </div> : null}
             </>
           ) : (
-            <span>skeleton</span>
+            <span className="text-clay-500">Not available</span>
           )}
         </div>
       </section>
@@ -531,7 +598,7 @@ export default async function AnalysisPage({
           className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12"
           id="reported-claims"
         >
-          {analysis.claims ? (
+          {hasClaims && analysis.claims ? (
             <>
               {analysis.claims.map((claim, index) => (
                 <div
@@ -548,7 +615,7 @@ export default async function AnalysisPage({
                       <ArticleBadge
                         variant="tf"
                         value={formatValue(
-                          claim.verification?.output?.content.verdict ||
+                          claim.verification?.output?.content?.verdict ||
                             "Unverified",
                         )}
                       />
@@ -556,9 +623,10 @@ export default async function AnalysisPage({
                   </div>
 
                   <ul className="list-disc pl-4 flex flex-col gap-1.5">
-                    {claim.verification ? (
+                    {claim.verification?.output?.content &&
+                    claim.verification.output.content.findings.length > 0 ? (
                       <>
-                        {claim.verification.output?.content.findings.map(
+                        {claim.verification.output.content.findings.map(
                           (finding, index) => (
                             <li key={index}>
                               {finding.statement}{" "}
@@ -604,14 +672,14 @@ export default async function AnalysisPage({
                         )}
                       </>
                     ) : (
-                      <>skeleton</>
+                      <li className="list-none text-clay-500">Not available</li>
                     )}
                   </ul>
                 </div>
               ))}
             </>
           ) : (
-            <span>claim skeleton</span>
+            <span className="text-clay-500">Not available</span>
           )}
         </div>
       </section>
