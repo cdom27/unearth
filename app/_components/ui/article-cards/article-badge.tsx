@@ -21,7 +21,7 @@ const BADGE_COLORS: Record<string, string> = {
   "mostly one sided": "bg-rating-mixed text-clay-900",
   balanced: "bg-rating-very-high",
   positive: "bg-rating-very-high",
-  neutral: "bg-clay-400",
+  neutral: "bg-clay-600",
 };
 
 function getPopoverContent(variant: string, value: string) {
