@@ -40,14 +40,73 @@ export async function getAnalysis(
   if (!analysis) return null;
 
   return {
-    ...analysis,
     analysis: {
-      ...analysis.analysis,
+      summary: analysis.analysis.summary
+        ? {
+            tldr: analysis.analysis.summary.tldr?.trim() || null,
+            insights: Array.isArray(analysis.analysis.summary.insights)
+              ? analysis.analysis.summary.insights.filter(
+                  (insight): insight is string =>
+                    typeof insight === "string" && insight.trim().length > 0,
+                )
+              : [],
+            quotes: Array.isArray(analysis.analysis.summary.quotes)
+              ? analysis.analysis.summary.quotes
+                  .map((quote) => ({
+                    text: quote?.text?.trim() || null,
+                    speaker: quote?.speaker?.trim() || null,
+                  }))
+                  .filter((quote) => quote.text || quote.speaker)
+              : [],
+          }
+        : null,
+      sentiment: analysis.analysis.sentiment?.trim() || null,
+      framing: analysis.analysis.framing
+        ? {
+            narrative: analysis.analysis.framing.narrative?.trim() || null,
+            terms: Array.isArray(analysis.analysis.framing.terms)
+              ? analysis.analysis.framing.terms
+              : [],
+            devices: Array.isArray(analysis.analysis.framing.devices)
+              ? analysis.analysis.framing.devices
+              : [],
+            sourcing: analysis.analysis.framing.sourcing
+              ? {
+                  balance:
+                    analysis.analysis.framing.sourcing.balance || null,
+                  notes:
+                    analysis.analysis.framing.sourcing.notes?.trim() || null,
+                }
+              : null,
+          }
+        : null,
+      claims: Array.isArray(analysis.analysis.claims)
+        ? analysis.analysis.claims.map((claim) => ({
+            content: claim.content,
+            verification: claim.verification
+              ? {
+                  output: claim.verification.output
+                    ? {
+                        content: claim.verification.output.content || null,
+                        grounding: Array.isArray(
+                          claim.verification.output.grounding,
+                        )
+                          ? claim.verification.output.grounding
+                          : [],
+                      }
+                    : null,
+                }
+              : null,
+          }))
+        : null,
+      factualScore: analysis.analysis.factualScore,
+      biasScore: analysis.analysis.biasScore,
       updatedAt: analysis.analysis.updatedAt.toISOString(),
     },
     article: {
       ...analysis.article,
       publishedTime: analysis.article.publishedTime.toISOString(),
     },
+    source: analysis.source,
   };
 }

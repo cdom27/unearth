@@ -1,6 +1,6 @@
 # Unearth
 
-A civic intelligence tool
+Unearth is an AI-assisted news analysis platform. It uses verified third-party data (Media Bias Fact Check and Allsides source ratings) alongside a rhetorical examination of an individual article's narrative, framing, sentiment, biases, and more. In addition, Exa AI's web search is used to fact check critical claims made within the article and provide external sources that verify or refute the claim.
 
 ## v2
 
