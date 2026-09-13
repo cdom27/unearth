@@ -1,4 +1,6 @@
 import Exa from "exa-js";
+import fs from "fs/promises";
+import path from "path";
 
 type ClaimVerificationContent = {
   verdict: "true" | "false" | "mixed" | "unverifiable";
@@ -10,6 +12,15 @@ type ClaimVerificationContent = {
 const exa = new Exa(process.env.EXA_API_KEY);
 
 export async function search(query: string) {
+  const systemPrompt = await fs.readFile(
+    path.join(
+      process.cwd(),
+      "app/api/v1/articles/_lib/utils/ai/exa/prompts",
+      "search.md",
+    ),
+    "utf-8",
+  );
+
   const result = await exa.search(query, {
     numResults: 10,
     outputSchema: {
@@ -34,8 +45,7 @@ export async function search(query: string) {
       },
       required: ["verdict", "findings"],
     },
-    systemPrompt:
-      "You are a rigorous, non-partisan fact-checker. Analyze the following claim with strict neutrality — do not favor any political party, ideology, or agenda.",
+    systemPrompt: systemPrompt,
     type: "deep-lite",
   });
 
