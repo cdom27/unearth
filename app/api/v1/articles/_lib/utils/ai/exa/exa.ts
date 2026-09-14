@@ -11,6 +11,28 @@ type ClaimVerificationContent = {
 
 const exa = new Exa(process.env.EXA_API_KEY);
 
+class ExaRateLimiter {
+  private nextAvailableAt = 0;
+
+  constructor(private readonly intervalMs: number) {}
+
+  schedule<T>(task: () => Promise<T>): Promise<T> {
+    const now = Date.now();
+    const startAt = Math.max(now, this.nextAvailableAt);
+    this.nextAvailableAt = startAt + this.intervalMs;
+
+    return new Promise<T>((resolve, reject) => {
+      setTimeout(() => {
+        Promise.resolve().then(task).then(resolve, reject);
+      }, Math.max(0, startAt - now));
+    });
+  }
+}
+
+// This limiter is shared by all analyses in the current Node process. It would
+// need to become distributed if the application runs multiple server instances.
+export const exaLimiter = new ExaRateLimiter(1000 / 8);
+
 export async function search(query: string) {
   const startedAt = performance.now();
 

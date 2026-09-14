@@ -14,7 +14,7 @@ import type { SummaryDTO } from "./dtos/summary";
 import type { AnalysisDTO } from "./dtos/analysis";
 import { eq, sql } from "drizzle-orm";
 import type { ClaimExtractionDTO } from "./dtos/claim-extraction";
-import { search } from "./utils/ai/exa/exa";
+import { exaLimiter, search } from "./utils/ai/exa/exa";
 import type { Claim } from "./types/claim";
 import { inspectMediaSubmission } from "./utils/inspect-media-submission";
 
@@ -185,13 +185,18 @@ async function runClaimVerification(analysisId: string) {
       meta: Awaited<ReturnType<typeof search>>["meta"];
     }[] = [];
 
-    for (const claim of claims) {
-      const result = await search(claim.content);
-      verificationResults.push({
+    const results = await Promise.all(
+      claims.map((claim) =>
+        exaLimiter.schedule(() => search(claim.content)),
+      ),
+    );
+
+    verificationResults.push(
+      ...results.map((result) => ({
         verification: result.data,
         meta: result.meta,
-      });
-    }
+      })),
+    );
 
     const verifiedClaims = claims.map((claim, index) => ({
       ...claim,
