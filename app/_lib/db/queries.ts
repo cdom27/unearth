@@ -44,12 +44,6 @@ export async function getAnalysis(
       summary: analysis.analysis.summary
         ? {
             tldr: analysis.analysis.summary.tldr?.trim() || null,
-            insights: Array.isArray(analysis.analysis.summary.insights)
-              ? analysis.analysis.summary.insights.filter(
-                  (insight): insight is string =>
-                    typeof insight === "string" && insight.trim().length > 0,
-                )
-              : [],
             quotes: Array.isArray(analysis.analysis.summary.quotes)
               ? analysis.analysis.summary.quotes
                   .map((quote) => ({

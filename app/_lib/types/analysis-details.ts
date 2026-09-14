@@ -5,7 +5,6 @@ type QuoteDetails = {
 
 type SummaryDetails = {
   tldr: string | null;
-  insights: string[];
   quotes: QuoteDetails[];
 } | null;
 

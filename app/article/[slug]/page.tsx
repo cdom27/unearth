@@ -29,7 +29,6 @@ export default async function AnalysisPage({
   const shareUrl = `https://unearth.news/article/${slug}`;
   const hasText = (value: string | null | undefined): value is string =>
     Boolean(value?.trim());
-  const hasInsights = Boolean(analysis.summary?.insights.length);
   const hasQuotes = Boolean(analysis.summary?.quotes.length);
   const hasNarrative = hasText(analysis.framing?.narrative);
   const hasBalance = Boolean(
@@ -54,9 +53,6 @@ export default async function AnalysisPage({
     { id: "summary", label: "Summary", main: true },
     ...(hasText(analysis.summary?.tldr)
       ? [{ id: "general-summary", label: "General Summary" }]
-      : []),
-    ...(hasInsights
-      ? [{ id: "key-insights", label: "Key Insights" }]
       : []),
     ...(hasQuotes ? [{ id: "direct-quotes", label: "Direct Quotes" }] : []),
     { id: "rhetorical-analysis", label: "Rhetorical Analysis", main: true },
@@ -123,7 +119,7 @@ export default async function AnalysisPage({
 
           <section className="mt-8 flex flex-col gap-10 sm:mt-12 lg:flex-row lg:gap-16">
             <h2 className="sr-only" id="summary">
-              Summary &amp; Insights
+              Summary
             </h2>
 
             <div className="flex min-w-0 w-full flex-col gap-10 sm:gap-12 lg:sticky lg:top-6 lg:self-start lg:w-2/3">
@@ -148,34 +144,6 @@ export default async function AnalysisPage({
                       <p className="text-clay-500">Not available</p>
                     )}
                   </div>
-
-                {hasInsights && analysis.summary ? (
-                  <div className="flex flex-col gap-2">
-                    <ExplanationPopover
-                      content={`Insights are key extractions from the article that help you understand the report.`}
-                      className="self-start"
-                    >
-                      <h3
-                        className="font-bold flex items-center gap-1.5"
-                        id="key-insights"
-                      >
-                        <span>Key Insights</span>
-                        <InfoIcon className="size-3.5 text-clay-500" />
-                      </h3>
-                    </ExplanationPopover>
-
-                    <ExpandableContent>
-                      {analysis.summary.insights.map((insight, index) => (
-                        <div
-                          key={index}
-                          className="bg-clay-100 p-4 sm:p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
-                        >
-                          {insight}
-                        </div>
-                      ))}
-                    </ExpandableContent>
-                  </div>
-                ) : null}
 
                 {hasQuotes && analysis.summary ? (
                   <div className="flex flex-col gap-4">
@@ -278,28 +246,20 @@ export default async function AnalysisPage({
                           Summary
                         </a>
                       </li>
-                      {hasText(analysis.summary?.tldr) ||
-                      hasInsights ||
-                      hasQuotes ? (
+                      {hasText(analysis.summary?.tldr) || hasQuotes ? (
                         <>
-                          {hasText(analysis.summary?.tldr) && <li className="pl-4">
-                            <a
-                              href="#general-summary"
-                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                            >
-                              General Summary
-                            </a>
-                          </li>}
-                          {hasInsights && analysis.summary && <li className="pl-4">
-                            <a
-                              href="#key-insights"
-                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                            >
-                              Key Insights{" "}
-                              <span>({analysis.summary.insights.length})</span>
-                            </a>
-                          </li>}
-                          {hasQuotes && analysis.summary && <li className="pl-4">
+                          {hasText(analysis.summary?.tldr) && (
+                            <li className="pl-4">
+                              <a
+                                href="#general-summary"
+                                className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                              >
+                                General Summary
+                              </a>
+                            </li>
+                          )}
+                          {hasQuotes && analysis.summary && (
+                            <li className="pl-4">
                             <a
                               href="#direct-quotes"
                               className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
@@ -307,7 +267,8 @@ export default async function AnalysisPage({
                               Direct Quotes{" "}
                               <span>({analysis.summary.quotes.length})</span>
                             </a>
-                          </li>}
+                            </li>
+                          )}
                         </>
                       ) : null}
                     </ol>
