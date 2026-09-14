@@ -12,6 +12,7 @@ import { anthropic } from "./utils/ai/anthropic/anthropic";
 import type { AnalysisResultDTO } from "./dtos/analysis-result";
 import type { SummaryDTO } from "./dtos/summary";
 import type { AnalysisDTO } from "./dtos/analysis";
+import type { FramingDTO } from "./dtos/framing";
 import { eq, sql } from "drizzle-orm";
 import type { ClaimExtractionDTO } from "./dtos/claim-extraction";
 import { exaLimiter, search } from "./utils/ai/exa/exa";
@@ -84,12 +85,64 @@ async function runRhetoricalAnalysis(analysisId: string, textContent: string) {
   const startedAt = performance.now();
 
   try {
-    const response = await anthropic("claude-sonnet-4-6", "analyze", textContent);
+    const framingStartedAt = performance.now();
+    const evidenceStartedAt = performance.now();
+    const [framingResult, evidenceResult] = await Promise.all([
+      anthropic("claude-sonnet-4-6", "rhetoricalFraming", textContent).then(
+        (response) => ({
+          response,
+          stageDurationMs:
+            Math.round((performance.now() - framingStartedAt) * 100) / 100,
+        }),
+      ),
+      anthropic("claude-sonnet-4-6", "rhetoricalEvidence", textContent).then(
+        (response) => ({
+          response,
+          stageDurationMs:
+            Math.round((performance.now() - evidenceStartedAt) * 100) / 100,
+        }),
+      ),
+    ]);
+    const framingResponse = framingResult.response;
+    const evidenceResponse = evidenceResult.response;
 
-    if (!response.data) throw new Error("No rhetorical analysis data returned");
+    if (!framingResponse.data || !evidenceResponse.data) {
+      throw new Error("No rhetorical framing or evidence data returned");
+    }
 
-    const data = response.data as AnalysisDTO;
+    const synthesisInput = JSON.stringify({
+      framing: framingResponse.data,
+      rhetoricalEvidence: evidenceResponse.data,
+    });
+    const synthesisStartedAt = performance.now();
+    const synthesisResponse = await anthropic(
+      "claude-sonnet-4-6",
+      "rhetoricalSynthesis",
+      synthesisInput,
+    );
+    const synthesisStageDurationMs =
+      Math.round((performance.now() - synthesisStartedAt) * 100) / 100;
 
+    if (!synthesisResponse.data) {
+      throw new Error("No rhetorical synthesis data returned");
+    }
+
+    const framing = framingResponse.data as Omit<FramingDTO, "terms" | "devices">;
+    const evidence = evidenceResponse.data as Pick<FramingDTO, "terms" | "devices">;
+    const synthesis = synthesisResponse.data as Pick<
+      AnalysisDTO,
+      "sentiment" | "biasScore"
+    >;
+    const data: AnalysisDTO = {
+      sentiment: synthesis.sentiment,
+      framing: {
+        ...framing,
+        ...evidence,
+      },
+      biasScore: synthesis.biasScore,
+    };
+    const stageDurationMs =
+      Math.round((performance.now() - startedAt) * 100) / 100;
     await db
       .update(analyses)
       .set({
@@ -101,9 +154,18 @@ async function runRhetoricalAnalysis(analysisId: string, textContent: string) {
           coalesce(${analyses.meta}, '{}'::jsonb),
           '{analysis}',
           ${JSON.stringify({
-            ...response.meta,
-            durationMs:
-              Math.round((performance.now() - startedAt) * 100) / 100,
+            durationMs: stageDurationMs,
+            framingDurationMs: framingResult.stageDurationMs,
+            evidenceDurationMs: evidenceResult.stageDurationMs,
+            synthesisDurationMs: synthesisStageDurationMs,
+            framingRequestDurationMs: framingResponse.meta.requestDurationMs,
+            evidenceRequestDurationMs: evidenceResponse.meta.requestDurationMs,
+            synthesisRequestDurationMs:
+              synthesisResponse.meta.requestDurationMs,
+            parallelCriticalPathMs: Math.max(
+              framingResponse.meta.requestDurationMs,
+              evidenceResponse.meta.requestDurationMs,
+            ),
           })}::jsonb,
           true
         )`,
