@@ -12,6 +12,8 @@ type ClaimVerificationContent = {
 const exa = new Exa(process.env.EXA_API_KEY);
 
 export async function search(query: string) {
+  const startedAt = performance.now();
+
   const systemPrompt = await fs.readFile(
     path.join(
       process.cwd(),
@@ -65,6 +67,7 @@ export async function search(query: string) {
       searchTime: result.searchTime,
       costDollars: result.costDollars,
       resolvedSearchType: result.resolvedSearchType,
+      durationMs: Math.round((performance.now() - startedAt) * 100) / 100,
       dateGeneratedISO: new Date().toISOString(),
     },
   };

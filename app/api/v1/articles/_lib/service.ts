@@ -42,6 +42,7 @@ async function runSummary(analysisId: string, textContent: string) {
   if (!analysis || analysis.summaryStatus === "completed") return;
 
   await updateTaskStatus(analysisId, "summaryStatus", "running");
+  const startedAt = performance.now();
 
   try {
     const response = await anthropic("claude-haiku-4-5", "summarize", textContent);
@@ -56,7 +57,11 @@ async function runSummary(analysisId: string, textContent: string) {
         meta: sql`jsonb_set(
           coalesce(${analyses.meta}, '{}'::jsonb),
           '{summary}',
-          ${JSON.stringify(response.meta)}::jsonb,
+          ${JSON.stringify({
+            ...response.meta,
+            durationMs:
+              Math.round((performance.now() - startedAt) * 100) / 100,
+          })}::jsonb,
           true
         )`,
         updatedAt: new Date(),
@@ -76,6 +81,7 @@ async function runRhetoricalAnalysis(analysisId: string, textContent: string) {
   if (!analysis || analysis.rhetoricalAnalysisStatus === "completed") return;
 
   await updateTaskStatus(analysisId, "rhetoricalAnalysisStatus", "running");
+  const startedAt = performance.now();
 
   try {
     const response = await anthropic("claude-sonnet-4-6", "analyze", textContent);
@@ -94,7 +100,11 @@ async function runRhetoricalAnalysis(analysisId: string, textContent: string) {
         meta: sql`jsonb_set(
           coalesce(${analyses.meta}, '{}'::jsonb),
           '{analysis}',
-          ${JSON.stringify(response.meta)}::jsonb,
+          ${JSON.stringify({
+            ...response.meta,
+            durationMs:
+              Math.round((performance.now() - startedAt) * 100) / 100,
+          })}::jsonb,
           true
         )`,
         updatedAt: new Date(),
@@ -114,6 +124,7 @@ async function runClaimExtraction(analysisId: string, textContent: string) {
   if (!analysis || analysis.claimExtractionStatus === "completed") return;
 
   await updateTaskStatus(analysisId, "claimExtractionStatus", "running");
+  const startedAt = performance.now();
 
   try {
     const response = await anthropic("claude-sonnet-4-6", "extract", textContent);
@@ -134,7 +145,12 @@ async function runClaimExtraction(analysisId: string, textContent: string) {
         meta: sql`jsonb_set(
           coalesce(${analyses.meta}, '{}'::jsonb),
           '{claimExtraction}',
-          ${JSON.stringify(response.meta)}::jsonb,
+          ${JSON.stringify({
+            ...response.meta,
+            claimCount: claims.length,
+            durationMs:
+              Math.round((performance.now() - startedAt) * 100) / 100,
+          })}::jsonb,
           true
         )`,
         updatedAt: new Date(),
@@ -160,6 +176,7 @@ async function runClaimVerification(analysisId: string) {
   }
 
   await updateTaskStatus(analysisId, "claimVerificationStatus", "running");
+  const startedAt = performance.now();
 
   try {
     const claims = (analysis.claims as Claim[] | null) ?? [];
@@ -191,6 +208,9 @@ async function runClaimVerification(analysisId: string) {
           '{claimVerification}',
           ${JSON.stringify({
             model: "deep-lite",
+            durationMs:
+              Math.round((performance.now() - startedAt) * 100) / 100,
+            requestCount: verificationResults.length,
             requests: verificationResults.map((result) => result.meta),
           })}::jsonb,
           true
@@ -218,6 +238,7 @@ async function runFactualScore(analysisId: string) {
   }
 
   await updateTaskStatus(analysisId, "factualScoreStatus", "running");
+  const startedAt = performance.now();
 
   try {
     const claims = (analysis.claims as Claim[] | null) ?? [];
@@ -251,6 +272,15 @@ async function runFactualScore(analysisId: string) {
       .set({
         factualScore,
         factualScoreStatus: "completed",
+        meta: sql`jsonb_set(
+          coalesce(${analyses.meta}, '{}'::jsonb),
+          '{factualScore}',
+          ${JSON.stringify({
+            durationMs:
+              Math.round((performance.now() - startedAt) * 100) / 100,
+          })}::jsonb,
+          true
+        )`,
         updatedAt: new Date(),
       })
       .where(eq(analyses.id, analysisId));
@@ -261,6 +291,9 @@ async function runFactualScore(analysisId: string) {
 }
 
 export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
+  const startedAt = performance.now();
+  let parsingDurationMs: number | undefined;
+
   try {
     const hostname = new URL(url).hostname;
 
@@ -292,7 +325,10 @@ export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
         };
       }
 
+      const parsingStartedAt = performance.now();
       parsedData = (await parseArticle(inspection.html)) as ParsedArticleDTO;
+      parsingDurationMs =
+        Math.round((performance.now() - parsingStartedAt) * 100) / 100;
 
       if (!parsedData || !parsedData.article) {
         await db.insert(rejectedSubmissions).values({
@@ -376,6 +412,7 @@ export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
             analysis: null,
             claimExtraction: null,
             claimVerification: null,
+            pipeline: null,
           },
         })
         .returning();
@@ -412,6 +449,30 @@ export async function analyzeArticle(url: string): Promise<AnalysisResultDTO> {
     const failure = results.find(
       (result): result is PromiseRejectedResult => result.status === "rejected",
     );
+
+    const pipelineMeta = {
+      totalDurationMs:
+        Math.round((performance.now() - startedAt) * 100) / 100,
+      ...(parsingDurationMs === undefined ? {} : { parsingDurationMs }),
+      completedAtISO: new Date().toISOString(),
+    };
+
+    try {
+      await db
+        .update(analyses)
+        .set({
+          meta: sql`jsonb_set(
+            coalesce(${analyses.meta}, '{}'::jsonb),
+            '{pipeline}',
+            ${JSON.stringify(pipelineMeta)}::jsonb,
+            true
+          )`,
+          updatedAt: new Date(),
+        })
+        .where(eq(analyses.id, analysisId));
+    } catch (error) {
+      console.error("Unable to record analysis timing metrics:", error);
+    }
 
     if (failure) {
       console.error("One or more analysis tasks failed:", failure.reason);

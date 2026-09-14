@@ -14,6 +14,7 @@ import type { Claim } from "@/app/api/v1/articles/_lib/types/claim";
 import type { FramingDTO } from "@/app/api/v1/articles/_lib/dtos/framing";
 import type { SummaryDTO } from "@/app/api/v1/articles/_lib/dtos/summary";
 import type { ClaimVerificationDTO } from "@/app/api/v1/articles/_lib/dtos/claim-verification";
+import type { MetaDTO } from "@/app/api/v1/articles/_lib/dtos/meta";
 
 export const analysisTaskStatusEnum = pgEnum("analysis_task_status", [
   "pending",
@@ -82,7 +83,7 @@ export const analyses = pgTable("analyses", {
   claims: jsonb("claims").$type<
     (Claim & { verification: ClaimVerificationDTO | null })[] | null
   >(),
-  meta: jsonb("meta").notNull(),
+  meta: jsonb("meta").$type<MetaDTO>().notNull(),
   factualScore: doublePrecision("factual_score"),
   biasScore: doublePrecision("bias_score"),
   summaryStatus: analysisTaskStatusEnum("summary_status")
