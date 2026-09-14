@@ -8,19 +8,13 @@ function getToolForMode(mode: string): Tool {
     case "summarize":
       return {
         name: "record_summary",
-        description:
-          "Record the summary, insights, and quotes for the article.",
+        description: "Record the summary and quotes for the article.",
         input_schema: {
           type: "object",
           properties: {
             tldr: {
               type: "string",
               description: "A single-sentence neutral summary.",
-            },
-            insights: {
-              type: "array",
-              items: { type: "string" },
-              description: "Up to 6 key factual bullet points.",
             },
             quotes: {
               type: "array",
@@ -35,7 +29,7 @@ function getToolForMode(mode: string): Tool {
               description: "1 to 2 pivotal, exact quotes from key figures.",
             },
           },
-          required: ["tldr", "insights", "quotes"],
+          required: ["tldr", "quotes"],
         },
       };
     case "analyze":

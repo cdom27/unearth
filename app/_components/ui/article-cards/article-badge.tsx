@@ -32,7 +32,7 @@ function getPopoverContent(variant: string, value: string) {
   } else if (variant === "tone") {
     return `This term is used in a ${value} way within the report. Refer to the provided explantion for a deeper analysis.`;
   } else if (variant === "tf") {
-    return `This claim has been determined ${value.trim()}. Refer to the sources and insights that aided this evaluation.`;
+    return `This claim has been determined ${value.trim()}. Refer to the sources that aided this evaluation.`;
   }
   return value;
 }
