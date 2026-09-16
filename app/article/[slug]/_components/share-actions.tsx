@@ -51,12 +51,12 @@ export default function ShareActions({
           <EmailIcon className="size-5" />
         </a>
       </Tooltip>
-      <Tooltip content="Share on Site">
+      <Tooltip content="Copy link">
         <button
           type="button"
           className="inline-flex items-center justify-center leading-none hover:cursor-pointer"
           onClick={() => void navigator.clipboard.writeText(shareUrl)}
-          aria-label="Share on Site"
+          aria-label="Copy analysis page link"
         >
           <LinkIcon className="size-5" />
         </button>
