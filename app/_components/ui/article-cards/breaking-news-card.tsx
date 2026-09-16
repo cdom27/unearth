@@ -8,7 +8,14 @@ import { useRouter } from "next/navigation";
 import CircleNotchIcon from "../../icons/circle-notch";
 import XIcon from "../../icons/x";
 
-export default function BreakingNewsCard(props: ArticleCardBaseProps) {
+interface BreakingNewsCardProps extends ArticleCardBaseProps {
+  onUnprocessable: () => void;
+}
+
+export default function BreakingNewsCard({
+  onUnprocessable,
+  ...props
+}: BreakingNewsCardProps) {
   const { analyzeArticle, isAnalyzing, message } = useArticle();
   const router = useRouter();
 
@@ -19,6 +26,9 @@ export default function BreakingNewsCard(props: ArticleCardBaseProps) {
       if (slug) {
         router.push(`/article/${slug}`);
       }
+      if (!slug) {
+        onUnprocessable();
+      }
     } catch {
       console.log("Unable to process source");
       console.log(message);
@@ -27,6 +37,7 @@ export default function BreakingNewsCard(props: ArticleCardBaseProps) {
 
   return (
     <Tooltip
+      id={`bn-${props.article.url}`}
       content={
         isAnalyzing ? "Analyzing" : message ? message : "Analyze Article"
       }

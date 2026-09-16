@@ -14,6 +14,7 @@ interface TooltipProps {
   icon?: ReactNode;
   children: ReactNode;
   className?: string;
+  id?: string;
 }
 
 export default function Tooltip({
@@ -22,6 +23,7 @@ export default function Tooltip({
   icon,
   children,
   className = "",
+  id,
 }: TooltipProps) {
   const variantClasses = tooltipVariants[variant];
   const [isVisible, setIsVisible] = useState(false);
@@ -53,6 +55,7 @@ export default function Tooltip({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
+        id={id}
       >
         {children}
       </span>
