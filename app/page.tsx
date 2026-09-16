@@ -1,6 +1,7 @@
 import HistoryIcon from "./_components/icons/history";
 import BreakingNewsGallery from "./_components/ui/breaking-news/breaking-news-gallery";
 import AnalyzeArticleForm from "./_components/ui/forms/analyze-article-form";
+import ExplanationPopover from "./_components/ui/tooltip/explanation-popover";
 
 export default function Home() {
   const currDate = new Date();
@@ -32,12 +33,9 @@ export default function Home() {
             Latest breaking news stories from trusted sources.
           </p>
 
-          <span
-            className="flex items-center gap-1.5"
-            title={`Breaking News results last updated at ${time}`}
-          >
+          <ExplanationPopover content={`News results last fetched at ${time}`}>
             <HistoryIcon className="size-4" /> <span>{time}</span>
-          </span>
+          </ExplanationPopover>
         </div>
 
         <BreakingNewsGallery />

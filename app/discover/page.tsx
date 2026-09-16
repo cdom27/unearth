@@ -5,6 +5,7 @@ import Filters from "../_components/ui/filters/filters";
 import type { Params } from "../_lib/types/preview-params";
 import DiscoverSearch from "./_components/discover-search";
 import { DiscoverProvider } from "./_components/discover-provider";
+import ExplanationPopover from "../_components/ui/tooltip/explanation-popover";
 
 const VALID_SORTS: Params["sorting"][] = ["newest", "oldest", "factualScore"];
 
@@ -97,13 +98,15 @@ export default async function Discover({
 
       <article className="mx-4 mt-4 sm:mt-6 sm:mx-12 md:mt-10 xl:mt-16 2xl:mt-22 pt-4 sm:pt-6 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-12">
         <div className="flex flex-col">
-          <div
-            className="pb-3 text-clay-400 flex items-center gap-1.5 self-start"
-            title={`Search currently supports full-text search of titles and article content.\n\nSemantic search is actively being worked on, but not fully implemented.`}
+          <ExplanationPopover
+            className="self-start"
+            content="Search currently supports full-text search of titles and article content. Semantic search is actively being worked on, but not fully implemented."
           >
-            <p className="italic">How search works</p>
-            <InfoIcon className="size-4" />
-          </div>
+            <div className="pb-3 text-clay-400 flex items-center gap-1.5 self-start">
+              <p className="italic">How search works</p>
+              <InfoIcon className="size-4" />
+            </div>
+          </ExplanationPopover>
 
           <div className="flex flex-col md:flex-row gap-6 justify-between items-center">
             <DiscoverSearch />
