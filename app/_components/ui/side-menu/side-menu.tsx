@@ -1,7 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import LogoIcon from "../../icons/logo";
 import XIcon from "../../icons/x";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 
 interface SideMenuProps {
   setOpen: (action: boolean) => void;
@@ -16,8 +18,15 @@ export default function SideMenu({
   children,
   id,
 }: SideMenuProps) {
+  const openerRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
+
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      openerRef.current = activeElement;
+    }
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -25,6 +34,12 @@ export default function SideMenu({
     return () => {
       document.body.style.overflow = previousOverflow;
     };
+  }, [open]);
+
+  useEffect(() => {
+    if (open || !openerRef.current?.isConnected) return;
+
+    openerRef.current.focus();
   }, [open]);
 
   return (
@@ -42,7 +57,7 @@ export default function SideMenu({
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        aria-hidden={!open}
+        inert={!open}
         className={`bg-clay-900 text-clay-50 fixed w-full max-w-80 p-4 sm:py-6 flex flex-col gap-4 inset-0 z-20 transition-transform duration-500 ${open ? "translate-0" : "-translate-x-full"}`}
       >
         <div className="flex justify-between items-center pb-4 border-b border-clay-800">
