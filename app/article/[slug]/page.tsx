@@ -14,6 +14,7 @@ import ArticleTimeline, {
   TableOfContentsItem,
 } from "./_components/article-timeline";
 import ExpandableContent from "./_components/expandable-content";
+import ExpandableCard from "@/app/_components/ui/expandable-card/expandable-card";
 
 export default async function AnalysisPage({
   params,
@@ -55,6 +56,8 @@ export default async function AnalysisPage({
       ? [{ id: "general-summary", label: "General Summary" }]
       : []),
     ...(hasQuotes ? [{ id: "direct-quotes", label: "Direct Quotes" }] : []),
+    { id: "fact-check", label: "Fact Check", main: true },
+    ...(hasClaims ? [{ id: "reported-claims", label: "Reported Claims" }] : []),
     { id: "rhetorical-analysis", label: "Rhetorical Analysis", main: true },
     ...(hasNarrative ? [{ id: "narrative", label: "Narrative" }] : []),
     ...(hasBalance
@@ -64,8 +67,6 @@ export default async function AnalysisPage({
     ...(hasDevices
       ? [{ id: "rhetorical-devices", label: "Rhetorical Devices" }]
       : []),
-    { id: "fact-check", label: "Fact Check", main: true },
-    ...(hasClaims ? [{ id: "reported-claims", label: "Reported Claims" }] : []),
   ];
 
   let formattedSentiment = "Unverified";
@@ -87,6 +88,7 @@ export default async function AnalysisPage({
   }
 
   const analyzedTime = timeSince(analysis.updatedAt);
+  const publishedTime = timeSince(article.publishedTime);
 
   return (
     <>
@@ -94,7 +96,10 @@ export default async function AnalysisPage({
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-1.5 text-sm">
-              <span>Published {timeSince(article.publishedTime)} ago</span>
+              <span>
+                Published{" "}
+                {publishedTime === "Now" ? "just now" : `${publishedTime} ago`}
+              </span>
               <div className="size-1.5 bg-clay-900 rounded-full" />
               <span>
                 Analyzed{" "}
@@ -128,78 +133,168 @@ export default async function AnalysisPage({
             </h2>
 
             <div className="flex min-w-0 w-full flex-col gap-10 sm:gap-12 lg:sticky lg:top-6 lg:self-start lg:w-2/3">
-              <>
-                <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2">
+                <ExplanationPopover
+                  content={`Neutral summaries are based on AI-assisted methods in an attempt to extract the core idea of the article.`}
+                  className="self-start"
+                >
+                  <h3
+                    className="font-bold flex items-center gap-1.5"
+                    id="general-summary"
+                  >
+                    <span>Summary</span>
+                    <InfoIcon className="size-3.5 text-clay-500" />
+                  </h3>
+                </ExplanationPopover>
+
+                {hasText(analysis.summary?.tldr) ? (
+                  <p>{analysis.summary.tldr}</p>
+                ) : (
+                  <p className="text-clay-500">Not available</p>
+                )}
+              </div>
+
+              {hasQuotes && analysis.summary ? (
+                <div className="flex flex-col gap-4">
                   <ExplanationPopover
-                    content={`Neutral summaries are based on AI-assisted methods in an attempt to extract the core idea of the article.`}
+                    content={`Direct quotes are the exact words spoken by the speaker, or excerpts, in the article.`}
                     className="self-start"
                   >
                     <h3
                       className="font-bold flex items-center gap-1.5"
-                      id="general-summary"
+                      id="direct-quotes"
                     >
-                      <span>Summary</span>
+                      <span>Direct Quotes</span>
                       <InfoIcon className="size-3.5 text-clay-500" />
                     </h3>
                   </ExplanationPopover>
 
-                  {hasText(analysis.summary?.tldr) ? (
-                    <p>{analysis.summary.tldr}</p>
+                  <ExpandableContent>
+                    {analysis.summary.quotes.map((quote, index) => (
+                      <figure
+                        key={index}
+                        className="bg-clay-100 p-4 sm:p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
+                      >
+                        <blockquote>
+                          {hasText(quote.text) ? (
+                            <p className="text-2xl font-serif">
+                              &ldquo;{quote.text}&rdquo;
+                            </p>
+                          ) : (
+                            <p className="text-clay-500">Quote not available</p>
+                          )}
+                        </blockquote>
+                        {hasText(quote.speaker) ? (
+                          <figcaption className="italic ml-auto">
+                            &mdash; {quote.speaker}
+                          </figcaption>
+                        ) : (
+                          <figcaption className="italic ml-auto text-clay-500">
+                            Speaker not available
+                          </figcaption>
+                        )}
+                      </figure>
+                    ))}
+                  </ExpandableContent>
+                </div>
+              ) : null}
+
+              <div className="flex flex-col gap-4" id="fact-check">
+                <ExplanationPopover
+                  content="Fact checks compare reported claims with available evidence and identify the verdict and supporting findings."
+                  className="self-start"
+                >
+                  <h3 className="font-bold flex items-center gap-1.5">
+                    <span>Fact Check</span>
+                    <InfoIcon className="size-3.5 text-clay-500" />
+                  </h3>
+                </ExplanationPopover>
+
+                <div
+                  className="grid grid-cols-1 items-start gap-4 xl:gap-6"
+                  id="reported-claims"
+                >
+                  {hasClaims && analysis.claims ? (
+                    analysis.claims.map((claim, index) => (
+                      <ExpandableCard
+                        key={index}
+                        defaultOpen={index < 2}
+                        summary={
+                          <div className="flex min-w-0 flex-1 items-start justify-between gap-4">
+                            <span className="font-bold text-lg">
+                              {claim.content}
+                            </span>
+                            <ArticleBadge
+                              variant="tf"
+                              value={formatValue(
+                                claim.verification?.output?.content?.verdict ||
+                                  "Unverified",
+                              )}
+                            />
+                          </div>
+                        }
+                      >
+                        <h4 className="mb-2 font-bold">Findings</h4>
+                        <ul className="list-disc pl-4 flex flex-col gap-1.5">
+                          {claim.verification?.output?.content &&
+                          claim.verification.output.content.findings.length >
+                            0 ? (
+                            claim.verification.output.content.findings.map(
+                              (finding, findingIndex) => (
+                                <li key={findingIndex}>
+                                  {finding.statement}{" "}
+                                  {claim.verification?.output?.grounding
+                                    ?.filter(
+                                      (grounding) =>
+                                        grounding.field ===
+                                        `findings[${findingIndex}].statement`,
+                                    )
+                                    .map((grounding) =>
+                                      grounding.citations
+                                        .slice(0, 4)
+                                        .map((cit, citationIndex) => (
+                                          <ExplanationPopover
+                                            key={citationIndex}
+                                            content={
+                                              <div className="flex flex-col gap-2">
+                                                <span>Go to article:</span>
+                                                <span className="underline underline-offset-4">
+                                                  {cit.title}
+                                                </span>
+                                              </div>
+                                            }
+                                          >
+                                            <a
+                                              href={`${cit.url}?ref=unearth.news`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                            >
+                                              <span className="mr-0.5 inline-block size-5 rounded-full bg-clay-900 text-center text-sm text-clay-100">
+                                                {citationIndex + 1}
+                                              </span>
+                                            </a>
+                                          </ExplanationPopover>
+                                        )),
+                                    )}
+                                </li>
+                              ),
+                            )
+                          ) : (
+                            <li className="list-none text-clay-500">
+                              Not available
+                            </li>
+                          )}
+                        </ul>
+                      </ExpandableCard>
+                    ))
                   ) : (
-                    <p className="text-clay-500">Not available</p>
+                    <span className="text-clay-500">Not available</span>
                   )}
                 </div>
-
-                {hasQuotes && analysis.summary ? (
-                  <div className="flex flex-col gap-4">
-                    <ExplanationPopover
-                      content={`Direct quotes are the exact words spoken by the speaker, or excerpts, in the article.`}
-                      className="self-start"
-                    >
-                      <h3
-                        className="font-bold flex items-center gap-1.5"
-                        id="direct-quotes"
-                      >
-                        <span>Direct Quotes</span>
-                        <InfoIcon className="size-3.5 text-clay-500" />
-                      </h3>
-                    </ExplanationPopover>
-
-                    <ExpandableContent>
-                      {analysis.summary.quotes.map((quote, index) => (
-                        <figure
-                          key={index}
-                          className="bg-clay-100 p-4 sm:p-8 rounded-sm border-clay-150 border flex flex-col gap-3"
-                        >
-                          <blockquote>
-                            {hasText(quote.text) ? (
-                              <p className="text-2xl font-serif">
-                                &ldquo;{quote.text}&rdquo;
-                              </p>
-                            ) : (
-                              <p className="text-clay-500">
-                                Quote not available
-                              </p>
-                            )}
-                          </blockquote>
-                          {hasText(quote.speaker) ? (
-                            <figcaption className="italic ml-auto">
-                              &mdash; {quote.speaker}
-                            </figcaption>
-                          ) : (
-                            <figcaption className="italic ml-auto text-clay-500">
-                              Speaker not available
-                            </figcaption>
-                          )}
-                        </figure>
-                      ))}
-                    </ExpandableContent>
-                  </div>
-                ) : null}
-              </>
+              </div>
             </div>
 
-            <div className="flex min-w-0 w-full flex-col gap-6 lg:w-1/3">
+            <div className="flex min-w-0 w-full flex-col gap-6 lg:sticky lg:top-6 lg:self-start lg:w-1/3">
               <nav
                 id="article-table-of-contents"
                 className="self-stretch text-clay-150 bg-clay-900 p-4 sm:p-8 rounded-sm border-clay-900 border flex flex-col gap-3 mt-0 lg:mt-6"
@@ -241,6 +336,30 @@ export default async function AnalysisPage({
                 </article>
 
                 <ol className="flex flex-col gap-6">
+                  <li>
+                    <ol>
+                      <li className="font-bold text-lg">
+                        <a
+                          href="#fact-check"
+                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                        >
+                          Fact Check
+                        </a>
+                      </li>
+                      {hasClaims && (
+                        <li className="pl-4">
+                          <a
+                            href="#reported-claims"
+                            className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                          >
+                            Reported Claims{" "}
+                            <span>({analysis.claims?.length})</span>
+                          </a>
+                        </li>
+                      )}
+                    </ol>
+                  </li>
+
                   <li>
                     <ol>
                       <li className="font-bold text-lg">
@@ -340,30 +459,6 @@ export default async function AnalysisPage({
                       )}
                     </ol>
                   </li>
-
-                  <li>
-                    <ol>
-                      <li className="font-bold text-lg">
-                        <a
-                          href="#fact-check"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Fact Check
-                        </a>
-                      </li>
-                      <li className="pl-4">
-                        <a
-                          href="#fact-check"
-                          className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                        >
-                          Reported Claims{" "}
-                          {hasClaims && (
-                            <span>({analysis.claims?.length})</span>
-                          )}
-                        </a>
-                      </li>
-                    </ol>
-                  </li>
                 </ol>
               </nav>
 
@@ -430,7 +525,6 @@ export default async function AnalysisPage({
         <h2 className="font-serif text-4xl" id="rhetorical-analysis">
           Rhetorical Analysis
         </h2>
-
         <div className="flex flex-col gap-10 sm:gap-12">
           {analysis.framing ? (
             <>
@@ -569,101 +663,6 @@ export default async function AnalysisPage({
                   </Table>
                 </div>
               ) : null}
-            </>
-          ) : (
-            <span className="text-clay-500">Not available</span>
-          )}
-        </div>
-      </section>
-
-      <section className="m-4 sm:my-6 sm:mx-12 md:mt-10 xl:mt-16 2xl:mt-28 pt-8 sm:pt-12 md:pt-16 xl:pt-22 2xl:pt-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-2 border-t border-clay-200">
-        <h2 className="font-serif text-4xl" id="fact-check">
-          Fact Check
-        </h2>
-
-        <div
-          className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12"
-          id="reported-claims"
-        >
-          {hasClaims && analysis.claims ? (
-            <>
-              {analysis.claims.map((claim, index) => (
-                <div
-                  key={index}
-                  className={`flex flex-col gap-3 py-2 ${index % 2 !== 0 ? "md:pl-12 md:border-l md:border-clay-200" : ""}`}
-                >
-                  <p className="font-bold text-lg">
-                    {index + 1}. {claim.content}
-                  </p>
-
-                  <div className="pt-4 border-t border-clay-200">
-                    <h3 className="font-bold flex items-center gap-1.5">
-                      <span>Findings</span>
-                      <ArticleBadge
-                        variant="tf"
-                        value={formatValue(
-                          claim.verification?.output?.content?.verdict ||
-                            "Unverified",
-                        )}
-                      />
-                    </h3>
-                  </div>
-
-                  <ul className="list-disc pl-4 flex flex-col gap-1.5">
-                    {claim.verification?.output?.content &&
-                    claim.verification.output.content.findings.length > 0 ? (
-                      <>
-                        {claim.verification.output.content.findings.map(
-                          (finding, index) => (
-                            <li key={index}>
-                              {finding.statement}{" "}
-                              {claim.verification?.output?.grounding
-                                ?.filter(
-                                  (grounding) =>
-                                    grounding.field ===
-                                    `findings[${index}].statement`,
-                                )
-                                .map((grounding) =>
-                                  grounding.citations
-                                    .slice(0, 4)
-                                    .map((cit, index) => (
-                                      <ExplanationPopover
-                                        key={index}
-                                        content={
-                                          <div
-                                            className="flex flex-col gap-2"
-                                            key={index}
-                                          >
-                                            {" "}
-                                            <span>Go to article:</span>{" "}
-                                            <span className="underline underline-offset-4">
-                                              {cit.title}
-                                            </span>
-                                          </div>
-                                        }
-                                      >
-                                        <a
-                                          href={`${cit.url}?ref=unearth.news`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                        >
-                                          <div className="inline-block mr-0.5 text-clay-100 bg-clay-900 rounded-full text-sm size-5 text-center">
-                                            {index + 1}
-                                          </div>
-                                        </a>
-                                      </ExplanationPopover>
-                                    )),
-                                )}
-                            </li>
-                          ),
-                        )}
-                      </>
-                    ) : (
-                      <li className="list-none text-clay-500">Not available</li>
-                    )}
-                  </ul>
-                </div>
-              ))}
             </>
           ) : (
             <span className="text-clay-500">Not available</span>
