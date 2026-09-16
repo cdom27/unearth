@@ -91,7 +91,9 @@ export default async function Discover({
         <div className="flex flex-col gap-6">
           <h1 className="text-6xl lg:text-7xl font-serif">Discover</h1>
           <p className="text-lg font-sans max-w-150">
-            Browse claims, sources, and fact-checked stories.
+            Discover stories beyond the headlines. Browse analyzed articles,
+            claims, and sources to see what’s being reported, how it’s framed,
+            and what the available evidence supports.
           </p>
         </div>
       </section>
