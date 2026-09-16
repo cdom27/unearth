@@ -88,6 +88,13 @@ export default function BreakingNewsGallery() {
                 key={news.article.title.concat(", ", news.source.name)}
                 article={news.article}
                 source={news.source}
+                onUnprocessable={() => {
+                  setBreakingNewsArticles((prev) =>
+                    prev.filter(
+                      (article) => article.article.url !== news.article.url,
+                    ),
+                  );
+                }}
                 badge={
                   <ArticleBadge
                     variant="time"
