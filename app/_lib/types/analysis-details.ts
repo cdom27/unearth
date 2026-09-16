@@ -45,6 +45,16 @@ type ClaimDetails = {
         confidence: "low" | "medium" | "high";
       }[];
     } | null;
+    results:
+      | {
+          id: string;
+          title: string | null;
+          url: string;
+          publishedDate?: string;
+          author?: string;
+          image?: string;
+        }[]
+      | null;
   } | null;
 };
 
