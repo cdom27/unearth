@@ -7,6 +7,7 @@ import ArticleCardBase, { ArticleCardBaseProps } from "./article-card-base";
 import { useRouter } from "next/navigation";
 import CircleNotchIcon from "../../icons/circle-notch";
 import XIcon from "../../icons/x";
+import CheckIcon from "../../icons/check";
 
 interface BreakingNewsCardProps extends ArticleCardBaseProps {
   onUnprocessable: () => void;
@@ -44,6 +45,8 @@ export default function BreakingNewsCard({
       icon={
         isAnalyzing ? (
           <CircleNotchIcon className="size-6 animate-spin" />
+        ) : message === "Analysis Complete!" ? (
+          <CheckIcon className="size-6" />
         ) : message ? (
           <XIcon className="size-4" />
         ) : (
