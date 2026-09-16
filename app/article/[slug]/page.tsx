@@ -87,6 +87,7 @@ export default async function AnalysisPage({
   }
 
   const analyzedTime = timeSince(analysis.updatedAt);
+  const publishedTime = timeSince(article.publishedTime);
 
   return (
     <>
@@ -94,7 +95,10 @@ export default async function AnalysisPage({
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-1.5 text-sm">
-              <span>Published {timeSince(article.publishedTime)} ago</span>
+              <span>
+                Published{" "}
+                {publishedTime === "Now" ? "just now" : `${publishedTime} ago`}
+              </span>
               <div className="size-1.5 bg-clay-900 rounded-full" />
               <span>
                 Analyzed{" "}
