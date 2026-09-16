@@ -33,7 +33,7 @@ export default async function AnalysisPage({
   const hasNarrative = hasText(analysis.framing?.narrative);
   const hasBalance = Boolean(
     analysis.framing?.sourcing?.balance ||
-      hasText(analysis.framing?.sourcing?.notes),
+    hasText(analysis.framing?.sourcing?.notes),
   );
   const hasTerms = Boolean(analysis.framing?.terms.length);
   const hasDevices = Boolean(analysis.framing?.devices.length);
@@ -86,6 +86,8 @@ export default async function AnalysisPage({
     );
   }
 
+  const analyzedTime = timeSince(analysis.updatedAt);
+
   return (
     <>
       <section className="m-4 sm:my-6 sm:mx-12 md:my-10 xl:my-16 2xl:my-22 pb-8 sm:pb-12 md:pb-16 xl:pb-22 2xl:pb-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-8 sm:gap-12 border-b border-clay-200">
@@ -94,7 +96,10 @@ export default async function AnalysisPage({
             <div className="flex flex-wrap items-center gap-1.5 text-sm">
               <span>Published {timeSince(article.publishedTime)} ago</span>
               <div className="size-1.5 bg-clay-900 rounded-full" />
-              <span>Analyzed {timeSince(analysis.updatedAt)} ago</span>
+              <span>
+                Analyzed{" "}
+                {analyzedTime === "Now" ? "just now" : `${analyzedTime} ago`}
+              </span>
             </div>
 
             <ShareActions articleTitle={article.title} shareUrl={shareUrl} />
@@ -125,25 +130,25 @@ export default async function AnalysisPage({
             <div className="flex min-w-0 w-full flex-col gap-10 sm:gap-12 lg:sticky lg:top-6 lg:self-start lg:w-2/3">
               <>
                 <div className="flex flex-col gap-2">
-                    <ExplanationPopover
-                      content={`Neutral summaries are based on AI-assisted methods in an attempt to extract the core idea of the article.`}
-                      className="self-start"
+                  <ExplanationPopover
+                    content={`Neutral summaries are based on AI-assisted methods in an attempt to extract the core idea of the article.`}
+                    className="self-start"
+                  >
+                    <h3
+                      className="font-bold flex items-center gap-1.5"
+                      id="general-summary"
                     >
-                      <h3
-                        className="font-bold flex items-center gap-1.5"
-                        id="general-summary"
-                      >
-                        <span>Summary</span>
-                        <InfoIcon className="size-3.5 text-clay-500" />
-                      </h3>
-                    </ExplanationPopover>
+                      <span>Summary</span>
+                      <InfoIcon className="size-3.5 text-clay-500" />
+                    </h3>
+                  </ExplanationPopover>
 
-                    {hasText(analysis.summary?.tldr) ? (
-                      <p>{analysis.summary.tldr}</p>
-                    ) : (
-                      <p className="text-clay-500">Not available</p>
-                    )}
-                  </div>
+                  {hasText(analysis.summary?.tldr) ? (
+                    <p>{analysis.summary.tldr}</p>
+                  ) : (
+                    <p className="text-clay-500">Not available</p>
+                  )}
+                </div>
 
                 {hasQuotes && analysis.summary ? (
                   <div className="flex flex-col gap-4">
@@ -260,13 +265,13 @@ export default async function AnalysisPage({
                           )}
                           {hasQuotes && analysis.summary && (
                             <li className="pl-4">
-                            <a
-                              href="#direct-quotes"
-                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                            >
-                              Direct Quotes{" "}
-                              <span>({analysis.summary.quotes.length})</span>
-                            </a>
+                              <a
+                                href="#direct-quotes"
+                                className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                              >
+                                Direct Quotes{" "}
+                                <span>({analysis.summary.quotes.length})</span>
+                              </a>
                             </li>
                           )}
                         </>
@@ -284,42 +289,53 @@ export default async function AnalysisPage({
                           Rhetorical Analysis
                         </a>
                       </li>
-                      {(hasNarrative || hasBalance || hasTerms || hasDevices) && (
+                      {(hasNarrative ||
+                        hasBalance ||
+                        hasTerms ||
+                        hasDevices) && (
                         <>
-                          {hasNarrative && <li className="pl-4">
-                            <a
-                              href="#narrative"
-                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                            >
-                              Narrative
-                            </a>
-                          </li>}
-                          {hasBalance && <li className="pl-4">
-                            <a
-                              href="#reporting-balance"
-                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                            >
-                              Reporting Balance
-                            </a>
-                          </li>}
-                          {hasTerms && analysis.framing && <li className="pl-4">
-                            <a
-                              href="#term-analysis"
-                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                            >
-                              Term Analysis{" "}
-                              <span>({analysis.framing.terms.length})</span>
-                            </a>
-                          </li>}
-                          {hasDevices && analysis.framing && <li className="pl-4">
-                            <a
-                              href="#rhetorical-devices"
-                              className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
-                            >
-                              Rhetorical Devices{" "}
-                              <span>({analysis.framing.devices.length})</span>
-                            </a>
-                          </li>}
+                          {hasNarrative && (
+                            <li className="pl-4">
+                              <a
+                                href="#narrative"
+                                className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                              >
+                                Narrative
+                              </a>
+                            </li>
+                          )}
+                          {hasBalance && (
+                            <li className="pl-4">
+                              <a
+                                href="#reporting-balance"
+                                className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                              >
+                                Reporting Balance
+                              </a>
+                            </li>
+                          )}
+                          {hasTerms && analysis.framing && (
+                            <li className="pl-4">
+                              <a
+                                href="#term-analysis"
+                                className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                              >
+                                Term Analysis{" "}
+                                <span>({analysis.framing.terms.length})</span>
+                              </a>
+                            </li>
+                          )}
+                          {hasDevices && analysis.framing && (
+                            <li className="pl-4">
+                              <a
+                                href="#rhetorical-devices"
+                                className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                              >
+                                Rhetorical Devices{" "}
+                                <span>({analysis.framing.devices.length})</span>
+                              </a>
+                            </li>
+                          )}
                         </>
                       )}
                     </ol>
@@ -464,85 +480,95 @@ export default async function AnalysisPage({
                 </div>
               </div>
 
-              {hasTerms ? <div className="flex flex-col gap-2">
-                <h3 className="font-serif text-3xl pb-4" id="term-analysis">
-                  Term Analysis
-                </h3>
+              {hasTerms ? (
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-serif text-3xl pb-4" id="term-analysis">
+                    Term Analysis
+                  </h3>
 
-                <Table
-                  caption="Term analysis"
-                  tableClassName="min-w-212.5 table-fixed"
-                  columns={[
-                    { label: "Term", className: "w-1/4" },
-                    { label: "Usage", className: "w-1/2" },
-                    { label: "Analysis", className: "w-1/4" },
-                  ]}
-                >
-                  <tbody>
-                    {analysis.framing.terms.map((term) => (
-                      <CollapsibleTableRow
-                        key={term.term}
-                        colSpan={3}
-                        summary={
-                          <>
-                            <th scope="row" className="px-4 py-4 font-semibold">
-                              {term.term}
-                            </th>
-                            <td className="px-4 py-4 capitalize flex">
-                              <ArticleBadge
-                                variant="tone"
-                                value={formatValue(term.tone)}
-                              />
-                            </td>
-                          </>
-                        }
-                        expandedContent={term.analysis}
-                        defaultExpanded
-                      />
-                    ))}
-                  </tbody>
-                </Table>
-              </div> : null}
+                  <Table
+                    caption="Term analysis"
+                    tableClassName="min-w-212.5 table-fixed"
+                    columns={[
+                      { label: "Term", className: "w-1/4" },
+                      { label: "Usage", className: "w-1/2" },
+                      { label: "Analysis", className: "w-1/4" },
+                    ]}
+                  >
+                    <tbody>
+                      {analysis.framing.terms.map((term) => (
+                        <CollapsibleTableRow
+                          key={term.term}
+                          colSpan={3}
+                          summary={
+                            <>
+                              <th
+                                scope="row"
+                                className="px-4 py-4 font-semibold"
+                              >
+                                {term.term}
+                              </th>
+                              <td className="px-4 py-4 capitalize flex">
+                                <ArticleBadge
+                                  variant="tone"
+                                  value={formatValue(term.tone)}
+                                />
+                              </td>
+                            </>
+                          }
+                          expandedContent={term.analysis}
+                          defaultExpanded
+                        />
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              ) : null}
 
-              {hasDevices ? <div className="flex flex-col gap-2">
-                <h3
-                  className="font-serif text-3xl pb-4"
-                  id="rhetorical-devices"
-                >
-                  Rhetorical Devices
-                </h3>
+              {hasDevices ? (
+                <div className="flex flex-col gap-2">
+                  <h3
+                    className="font-serif text-3xl pb-4"
+                    id="rhetorical-devices"
+                  >
+                    Rhetorical Devices
+                  </h3>
 
-                <Table
-                  caption="Rhetorical Devices"
-                  tableClassName="min-w-212.5 table-fixed"
-                  columns={[
-                    { label: "Device", className: "w-1/4" },
-                    { label: "Example in text", className: "w-1/2" },
-                    { label: "Analysis", className: "w-1/4" },
-                  ]}
-                >
-                  <tbody>
-                    {analysis.framing.devices.map((device) => (
-                      <CollapsibleTableRow
-                        key={device.device}
-                        colSpan={3}
-                        summary={
-                          <>
-                            <th scope="row" className="px-4 py-4 font-semibold">
-                              {device.device}
-                            </th>
-                            <td className="px-4 py-4 capitalize flex">
-                              {device.example}
-                            </td>
-                          </>
-                        }
-                        expandedContent={device.explanation}
-                        defaultExpanded
-                      />
-                    ))}
-                  </tbody>
-                </Table>
-              </div> : null}
+                  <Table
+                    caption="Rhetorical Devices"
+                    tableClassName="min-w-212.5 table-fixed"
+                    columns={[
+                      { label: "Device", className: "w-1/4" },
+                      { label: "Example in text", className: "w-1/2" },
+                      { label: "Analysis", className: "w-1/4" },
+                    ]}
+                  >
+                    <tbody>
+                      {analysis.framing.devices.map((device) => (
+                        <CollapsibleTableRow
+                          key={device.device}
+                          colSpan={3}
+                          summary={
+                            <>
+                              <th
+                                scope="row"
+                                className="px-4 py-4 font-semibold"
+                              >
+                                {device.device}
+                              </th>
+                              <td className="px-4 py-4 capitalize flex">
+                                {device.example}
+                              </td>
+                            </>
+                          }
+                          expandedContent={device.explanation}
+                          defaultExpanded
+                        />
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+              ) : null}
             </>
           ) : (
             <span className="text-clay-500">Not available</span>
