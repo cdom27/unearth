@@ -74,6 +74,9 @@ export default async function AnalysisPage({
     ...(hasDevices
       ? [{ id: "rhetorical-devices", label: "Rhetorical Devices" }]
       : []),
+    ...(relatedArticles.length
+      ? [{ id: "related-articles", label: "Related Articles", main: true }]
+      : []),
   ];
 
   let formattedSentiment = "Unverified";
@@ -466,6 +469,17 @@ export default async function AnalysisPage({
                       )}
                     </ol>
                   </li>
+
+                  {relatedArticles.length > 0 && (
+                    <li className="font-bold text-lg">
+                      <a
+                        href="#related-articles"
+                        className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                      >
+                        Related Articles <span>({relatedArticles.length})</span>
+                      </a>
+                    </li>
+                  )}
                 </ol>
               </nav>
 
@@ -678,7 +692,7 @@ export default async function AnalysisPage({
       </section>
 
       <section className="gap-12 m-4 sm:my-6 sm:mx-12 md:mt-10 xl:mt-16 2xl:mt-28 pt-8 sm:pt-12 md:pt-16 xl:pt-22 2xl:pt-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col border-t border-clay-200">
-        <h2 className="font-serif text-4xl" id="fact-check">
+        <h2 className="font-serif text-4xl" id="related-articles">
           Related Articles
         </h2>
 
