@@ -15,6 +15,8 @@ import ArticleTimeline, {
 } from "./_components/article-timeline";
 import ExpandableContent from "./_components/expandable-content";
 import ExpandableCard from "@/app/_components/ui/expandable-card/expandable-card";
+import { getRelatedArticles } from "./related-articles";
+import RelatedArticleCard from "@/app/_components/ui/article-cards/related-article-card";
 
 export default async function AnalysisPage({
   params,
@@ -27,6 +29,11 @@ export default async function AnalysisPage({
   if (!analysisDetails) notFound();
 
   const { article, analysis, source } = analysisDetails;
+  const relatedArticles = getRelatedArticles(
+    analysis.claims?.flatMap((claim) => claim.verification?.results ?? []) ??
+      [],
+    article.url,
+  );
   const shareUrl = `https://unearth.news/article/${slug}`;
   const hasText = (value: string | null | undefined): value is string =>
     Boolean(value?.trim());
@@ -66,6 +73,9 @@ export default async function AnalysisPage({
     ...(hasTerms ? [{ id: "term-analysis", label: "Term Analysis" }] : []),
     ...(hasDevices
       ? [{ id: "rhetorical-devices", label: "Rhetorical Devices" }]
+      : []),
+    ...(relatedArticles.length
+      ? [{ id: "related-articles", label: "Related Articles", main: true }]
       : []),
   ];
 
@@ -459,6 +469,17 @@ export default async function AnalysisPage({
                       )}
                     </ol>
                   </li>
+
+                  {relatedArticles.length > 0 && (
+                    <li className="font-bold text-lg">
+                      <a
+                        href="#related-articles"
+                        className="underline underline-offset-4 decoration-clay-700 hover:decoration-clay-500 hover:text-brand-500 transition-colors duration-300"
+                      >
+                        Related Articles <span>({relatedArticles.length})</span>
+                      </a>
+                    </li>
+                  )}
                 </ol>
               </nav>
 
@@ -667,6 +688,18 @@ export default async function AnalysisPage({
           ) : (
             <span className="text-clay-500">Not available</span>
           )}
+        </div>
+      </section>
+
+      <section className="gap-12 m-4 sm:my-6 sm:mx-12 md:mt-10 xl:mt-16 2xl:mt-28 pt-8 sm:pt-12 md:pt-16 xl:pt-22 2xl:pt-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col border-t border-clay-200">
+        <h2 className="font-serif text-4xl" id="related-articles">
+          Related Articles
+        </h2>
+
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 xl:grid-cols-3">
+          {relatedArticles.map((article) => (
+            <RelatedArticleCard key={article.url} article={article} />
+          ))}
         </div>
       </section>
 

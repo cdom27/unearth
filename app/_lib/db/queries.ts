@@ -66,8 +66,7 @@ export async function getAnalysis(
               : [],
             sourcing: analysis.analysis.framing.sourcing
               ? {
-                  balance:
-                    analysis.analysis.framing.sourcing.balance || null,
+                  balance: analysis.analysis.framing.sourcing.balance || null,
                   notes:
                     analysis.analysis.framing.sourcing.notes?.trim() || null,
                 }
@@ -89,6 +88,7 @@ export async function getAnalysis(
                           : [],
                       }
                     : null,
+                  results: claim.verification.results ?? null,
                 }
               : null,
           }))
