@@ -1,4 +1,6 @@
+import { after } from "next/server";
 import { apiResponse } from "../../_lib/build-response";
+import { ingestBreakingNewsArticles } from "./_lib/ingest";
 import { fetchBreakingNews } from "./_lib/service";
 
 export async function GET() {
@@ -11,6 +13,8 @@ export async function GET() {
         data: null,
       });
     }
+
+    after(() => ingestBreakingNewsArticles(newsAPIResponse.data.articles));
 
     return apiResponse({
       message: "Results fetched!",
