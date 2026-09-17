@@ -1,7 +1,9 @@
+import { after } from "next/server";
 import { normalizeURL } from "@/app/_lib/normalize-url";
 import { apiResponse } from "@/app/api/_lib/build-response";
 import { analyzeArticle } from "./_lib/service";
 import { acquireAnalysisSlot } from "./_lib/ip-analysis-limit";
+import { ingestExaResults } from "./_lib/ingest-exa-results";
 
 export async function POST(request: Request) {
   const releaseAnalysisSlot = acquireAnalysisSlot(request);
@@ -42,6 +44,8 @@ export async function POST(request: Request) {
         analysisResult.status ?? 400,
       );
     }
+
+    after(() => ingestExaResults(analysisResult.slug, normalizedURL));
 
     return apiResponse({
       message: "Analysis Complete!",
