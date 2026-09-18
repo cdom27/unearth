@@ -22,12 +22,11 @@ export default function BreakingNewsCard({
 
   async function handleSubmit() {
     try {
-      const slug = await analyzeArticle(props.article.url);
+      const result = await analyzeArticle(props.article.url);
 
-      if (slug) {
-        router.push(`/article/${slug}`);
-      }
-      if (!slug) {
+      if (result.kind === "success") {
+        router.push(`/article/${result.slug}`);
+      } else if (result.kind === "unprocessable") {
         onUnprocessable();
       }
     } catch {
@@ -59,7 +58,7 @@ export default function BreakingNewsCard({
         onClick={() => handleSubmit()}
         className="group hover:cursor-pointer rounded-sm flex disabled:cursor-not-allowed"
         aria-label={`Analyze: ${props.article.title} by ${props.source.name}`}
-        disabled={message != "" ? true : false}
+        disabled={isAnalyzing}
       >
         <ArticleCardBase {...props} />
       </button>
