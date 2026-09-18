@@ -11,8 +11,7 @@ export async function POST(request: Request) {
   if (!releaseAnalysisSlot) {
     return apiResponse(
       {
-        message:
-          "An article analysis is already in progress for this connection. Please wait for it to finish before submitting another article.",
+        message: "An article analysis is already in progress",
         data: null,
       },
       429,

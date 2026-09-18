@@ -15,10 +15,10 @@ export default function AnalyzeArticleForm() {
 
   async function handleSubmit() {
     try {
-      const slug = await analyzeArticle(url);
+      const result = await analyzeArticle(url);
 
-      if (slug) {
-        router.push(`/article/${slug}`);
+      if (result.kind === "success") {
+        router.push(`/article/${result.slug}`);
       }
     } catch {
       console.log("Unable to process source");

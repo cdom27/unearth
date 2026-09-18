@@ -40,14 +40,16 @@ export default function RelatedArticleCard({
   const [isVisible, setIsVisible] = useState(true);
 
   async function handleSubmit() {
-    const slug = await analyzeArticle(article.url);
+    const result = await analyzeArticle(article.url);
 
-    if (slug) {
-      router.push(`/article/${slug}`);
+    if (result.kind === "success") {
+      router.push(`/article/${result.slug}`);
       return;
     }
 
-    setIsVisible(false);
+    if (result.kind === "unprocessable") {
+      setIsVisible(false);
+    }
   }
 
   if (!isVisible) return null;
@@ -81,7 +83,7 @@ export default function RelatedArticleCard({
           onClick={() => void handleSubmit()}
           className="group flex w-full min-w-0 rounded-sm hover:cursor-pointer disabled:cursor-not-allowed"
           aria-label={`Analyze: ${article.title ?? "Untitled article"} from ${displayUrl}`}
-          disabled={isAnalyzing || message !== ""}
+          disabled={isAnalyzing}
         >
           <ArticleCardBase
             article={{
