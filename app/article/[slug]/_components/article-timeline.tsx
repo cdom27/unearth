@@ -61,7 +61,7 @@ export default function ArticleTimeline({ items }: ArticleTimelineProps) {
   return (
     <nav
       aria-label="Article sections"
-      className="fixed top-1/2 right-5 z-20 hidden -translate-y-1/2 sm:right-8 2xl:block"
+      className="fixed top-1/2 right-5 z-10 hidden -translate-y-1/2 sm:right-8 2xl:block"
     >
       <div
         className={`absolute right-full top-1/2 mr-3 flex max-h-[min(70vh,32rem)] -translate-y-1/2 flex-col justify-center gap-0.5 overflow-y-auto rounded-sm border border-clay-800 bg-clay-900 p-2 text-clay-100 shadow-[0_8px_24px_rgba(17,15,9,0.1)] transition-opacity duration-200 ${
