@@ -56,7 +56,7 @@ export default function ArticleCardBase({
   }
 
   return (
-    <article className="h-full flex flex-col gap-6">
+    <article className="h-full w-full flex flex-col gap-6">
       <div>
         <div className="overflow-clip rounded-t-sm">
           <Image
