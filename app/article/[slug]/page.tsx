@@ -230,18 +230,18 @@ export default async function AnalysisPage({
                         key={index}
                         defaultOpen={index < 2}
                         summary={
-                          <div className="flex min-w-0 flex-1 items-start justify-between gap-4">
-                            <span className="font-bold text-lg">
-                              {claim.content}
-                            </span>
-                            <ArticleBadge
-                              variant="tf"
-                              value={formatValue(
-                                claim.verification?.output?.content?.verdict ||
-                                  "Unverified",
-                              )}
-                            />
-                          </div>
+                          <span className="font-bold text-lg">
+                            {claim.content}
+                          </span>
+                        }
+                        summaryAction={
+                          <ArticleBadge
+                            variant="tf"
+                            value={formatValue(
+                              claim.verification?.output?.content?.verdict ||
+                                "Unverified",
+                            )}
+                          />
                         }
                       >
                         <h4 className="mb-2 font-bold">Findings</h4>
@@ -265,6 +265,7 @@ export default async function AnalysisPage({
                                         .map((cit, citationIndex) => (
                                           <ExplanationPopover
                                             key={citationIndex}
+                                            asChild
                                             content={
                                               <div className="flex flex-col gap-2">
                                                 <span>Go to article:</span>
