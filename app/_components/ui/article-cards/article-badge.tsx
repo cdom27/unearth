@@ -5,7 +5,10 @@ import ExplanationPopover from "../tooltip/explanation-popover";
 
 type ArticleBadgeProps =
   | { variant: "time"; timeStamp: string }
-  | { variant: "bias" | "sourcing" | "tone" | "tf"; value: string };
+  | {
+      variant: "bias" | "sourcing" | "tone" | "tf";
+      value: string;
+    };
 
 const BADGE_COLORS: Record<string, string> = {
   "lean left": "bg-left-500",
@@ -32,7 +35,15 @@ function getPopoverContent(variant: string, value: string) {
   } else if (variant === "tone") {
     return `This term is used in a ${value} way within the report. Refer to the provided explantion for a deeper analysis.`;
   } else if (variant === "tf") {
-    return `This claim has been determined ${value.trim()}. Refer to the sources that aided this evaluation.`;
+    if (value.trim() === "True") {
+      return `Strong evidence supports the claim.`;
+    } else if (value.trim() === "False") {
+      return `Strong evidence shows that the claim is untrue.`;
+    } else if (value.trim() === "Mixed") {
+      return `Claim is disputed or partly true. Evidence exists on both sides, or there isn’t enough to reach a definite conclusion.`;
+    } else {
+      return `This claim has been determined ${value.trim()}. Refer to the sources that aided this evaluation.`;
+    }
   }
   return value;
 }
@@ -61,14 +72,18 @@ export default function ArticleBadge(props: ArticleBadgeProps) {
     );
   }
 
+  const badge = (
+    <span
+      className={`flex items-center gap-1.5 ${getBadgeColor(props.value)} text-clay-100 py-1 px-4 rounded-full`}
+    >
+      <span>{props.value}</span>
+      <InfoIcon className="size-3" />
+    </span>
+  );
+
   return (
     <ExplanationPopover content={getPopoverContent(props.variant, props.value)}>
-      <div
-        className={`flex items-center gap-1.5 ${getBadgeColor(props.value)} text-clay-100 py-1 px-4 rounded-full`}
-      >
-        <span>{props.value}</span>
-        <InfoIcon className="size-3" />
-      </div>
+      {badge}
     </ExplanationPopover>
   );
 }
