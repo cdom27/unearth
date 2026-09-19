@@ -45,7 +45,7 @@ export default function SideMenu({
   return (
     <div>
       <div
-        className={`fixed inset-0 z-10 bg-clay-900 transition-opacity duration-400 ${
+        className={`fixed inset-0 z-20 bg-clay-900 transition-opacity duration-400 ${
           open
             ? "opacity-50 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -58,7 +58,7 @@ export default function SideMenu({
         aria-modal="true"
         aria-label="Navigation menu"
         inert={!open}
-        className={`bg-clay-900 text-clay-50 fixed w-full max-w-80 p-4 sm:py-6 flex flex-col gap-4 inset-0 z-20 transition-transform duration-500 ${open ? "translate-0" : "-translate-x-full"}`}
+        className={`bg-clay-900 text-clay-50 fixed w-full max-w-80 p-4 sm:py-6 flex flex-col gap-4 inset-0 z-30 transition-transform duration-500 ${open ? "translate-0" : "-translate-x-full"}`}
       >
         <div className="flex justify-between items-center pb-4 border-b border-clay-800">
           <Link
