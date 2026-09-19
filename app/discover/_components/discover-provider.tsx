@@ -15,11 +15,13 @@ type DiscoverContextValue = {
   search: string;
   sorting: Params["sorting"];
   filters: NonNullable<Params["filters"]>;
+  includeUnanalyzed: boolean;
   resultsVersion: number;
   saveFilters: (
     sorting: Params["sorting"],
     filters: NonNullable<Params["filters"]>,
     search: string,
+    includeUnanalyzed: boolean,
   ) => void;
 };
 
@@ -30,6 +32,7 @@ type DiscoverProviderProps = {
   initialSearch: string;
   initialSorting: Params["sorting"];
   initialFilters: NonNullable<Params["filters"]>;
+  initialIncludeUnanalyzed: boolean;
 };
 
 export function DiscoverProvider({
@@ -37,22 +40,28 @@ export function DiscoverProvider({
   initialSearch,
   initialSorting,
   initialFilters,
+  initialIncludeUnanalyzed,
 }: DiscoverProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [sorting, setSorting] = useState(initialSorting);
   const [search, setSearch] = useState(initialSearch);
   const [filters, setFilters] = useState(initialFilters);
+  const [includeUnanalyzed, setIncludeUnanalyzed] = useState(
+    initialIncludeUnanalyzed,
+  );
   const [resultsVersion, setResultsVersion] = useState(0);
 
   const saveFilters = useCallback((
     nextSorting: Params["sorting"],
     nextFilters: NonNullable<Params["filters"]>,
     nextSearch: string,
+    nextIncludeUnanalyzed: boolean,
   ) => {
     setSorting(nextSorting);
     setFilters(nextFilters);
     setSearch(nextSearch);
+    setIncludeUnanalyzed(nextIncludeUnanalyzed);
     setResultsVersion((version) => version + 1);
 
     const searchParams = new URLSearchParams();
@@ -61,6 +70,9 @@ export function DiscoverProvider({
     }
     if (nextSorting !== "newest") {
       searchParams.set("sort", nextSorting);
+    }
+    if (nextIncludeUnanalyzed) {
+      searchParams.set("includeUnanalyzed", "true");
     }
 
     const scalarFilters = [
@@ -91,8 +103,15 @@ export function DiscoverProvider({
   }, [pathname, router]);
 
   const value = useMemo(
-    () => ({ search, sorting, filters, resultsVersion, saveFilters }),
-    [filters, resultsVersion, saveFilters, search, sorting],
+    () => ({
+      search,
+      sorting,
+      filters,
+      includeUnanalyzed,
+      resultsVersion,
+      saveFilters,
+    }),
+    [filters, includeUnanalyzed, resultsVersion, saveFilters, search, sorting],
   );
 
   return (

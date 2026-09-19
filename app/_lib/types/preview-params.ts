@@ -22,4 +22,5 @@ export type Params = {
     credibilities?: string[];
   };
   sorting: "newest" | "oldest" | "factualScore";
+  includeUnanalyzed?: boolean;
 };

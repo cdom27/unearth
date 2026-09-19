@@ -66,7 +66,13 @@ function validateFilters(filters: FiltersState): ValidationErrors {
 }
 
 export default function Filters() {
-  const { search, sorting, filters, saveFilters } = useDiscover();
+  const {
+    search,
+    sorting,
+    filters,
+    includeUnanalyzed,
+    saveFilters,
+  } = useDiscover();
   const [isOpen, setIsOpen] = useState(false);
   const [draftSorting, setDraftSorting] = useState(sorting);
   const [draftFilters, setDraftFilters] = useState<FiltersState>(filters);
@@ -115,7 +121,7 @@ export default function Filters() {
     setValidationErrors(errors);
     if (Object.keys(errors).length) return;
 
-    saveFilters(draftSorting, draftFilters, search);
+    saveFilters(draftSorting, draftFilters, search, includeUnanalyzed);
     setIsOpen(false);
   }
 
@@ -132,6 +138,17 @@ export default function Filters() {
     setSourceQuery("");
     setValidationErrors({});
   }
+
+  function toggleUnanalyzed() {
+    saveFilters(sorting, filters, search, !includeUnanalyzed);
+  }
+
+  const hasAnalysisFilters =
+    filters.minBiasScore !== undefined ||
+    filters.maxBiasScore !== undefined ||
+    filters.minFactualScore !== undefined ||
+    filters.maxFactualScore !== undefined ||
+    Boolean(filters.sentiments?.length);
 
   function updateScore(
     key:
@@ -305,14 +322,35 @@ export default function Filters() {
         </div>
       </SideMenu>
 
-      <Button
-        type="button"
-        variant="secondary"
-        className="flex items-center gap-2 w-full justify-center"
-        onClick={isOpen ? () => setIsOpen(false) : openFilters}
-      >
-        <FiltersIcon /> <span>Filters</span>
-      </Button>
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
+        <div className="flex w-fit items-center gap-1.5">
+          <input
+            type="checkbox"
+            id="unanalyzed_articles"
+            name="unanalyzed_articles"
+            checked={includeUnanalyzed}
+            onChange={toggleUnanalyzed}
+          />
+          <label htmlFor="unanalyzed_articles" className="whitespace-nowrap">
+            Show unanalyzed articles
+          </label>
+        </div>
+        {includeUnanalyzed && hasAnalysisFilters && (
+          <p className="text-xs text-clay-300 max-w-60">
+            Unanalyzed articles are hidden when Bias Score, Factual Score, or
+            Sentiment filters are applied.
+          </p>
+        )}
+
+        <Button
+          type="button"
+          variant="secondary"
+          className="flex w-fit items-center justify-center gap-2"
+          onClick={isOpen ? () => setIsOpen(false) : openFilters}
+        >
+          <FiltersIcon /> <span>Filters</span>
+        </Button>
+      </div>
     </div>
   );
 }

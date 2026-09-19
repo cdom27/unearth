@@ -14,6 +14,7 @@ interface TooltipProps {
   icon?: ReactNode;
   children: ReactNode;
   className?: string;
+  wrapperClassName?: string;
   id?: string;
 }
 
@@ -23,6 +24,7 @@ export default function Tooltip({
   icon,
   children,
   className = "",
+  wrapperClassName = "",
   id,
 }: TooltipProps) {
   const variantClasses = tooltipVariants[variant];
@@ -51,7 +53,7 @@ export default function Tooltip({
   return (
     <>
       <span
-        className="inline-block leading-none"
+        className={`inline-block leading-none ${wrapperClassName}`.trim()}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}

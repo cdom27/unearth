@@ -6,16 +6,19 @@ import { useDiscover } from "@/app/discover/_components/discover-provider";
 import { useCallback, useEffect, useRef } from "react";
 import CircleNotchIcon from "../../icons/circle-notch";
 import AnalysisPreviewCard from "../article-cards/analysis-preview-card";
+import UnanalyzedArticleCard from "../article-cards/unanalyzed-article-card";
 import { ArticleCardBaseSkeleton } from "../article-cards/article-card-base";
 
 type AnalysesGalleryResultsProps = {
   sorting: Params["sorting"];
   filters: NonNullable<Params["filters"]>;
   search: string;
+  includeUnanalyzed: boolean;
 };
 
 export default function AnalysesGallery() {
-  const { search, sorting, filters, resultsVersion } = useDiscover();
+  const { search, sorting, filters, includeUnanalyzed, resultsVersion } =
+    useDiscover();
 
   return (
     <AnalysesGalleryResults
@@ -23,6 +26,7 @@ export default function AnalysesGallery() {
       sorting={sorting}
       filters={filters}
       search={search}
+      includeUnanalyzed={includeUnanalyzed}
     />
   );
 }
@@ -31,9 +35,10 @@ function AnalysesGalleryResults({
   sorting,
   filters,
   search,
+  includeUnanalyzed,
 }: AnalysesGalleryResultsProps) {
   const { isFetching, previewsResult, hasMore, fetchAnalysisPreviews } =
-    useAnalyses(9, sorting, filters, search);
+    useAnalyses(9, sorting, filters, search, includeUnanalyzed);
 
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -70,7 +75,11 @@ function AnalysesGalleryResults({
               <ArticleCardBaseSkeleton key={`analysis-skeleton-${index}`} />
             ))
           : previewsResult.previews.map((ap) => (
-              <AnalysisPreviewCard key={ap.analysis.slug} preview={ap} />
+              ap.kind === "analyzed" ? (
+                <AnalysisPreviewCard key={ap.analysis.slug} preview={ap} />
+              ) : (
+                <UnanalyzedArticleCard key={ap.articleId} article={ap} />
+              )
             ))}
       </div>
 
@@ -81,7 +90,7 @@ function AnalysesGalleryResults({
             {isFetching
               ? "Fetching articles"
               : `Showing ${previewsResult.previews.length} of
-  ${previewsResult?.totalResults || 0} analyses`}
+  ${previewsResult?.totalResults || 0} stories`}
           </p>
         </div>
       </div>

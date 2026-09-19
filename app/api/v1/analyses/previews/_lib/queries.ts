@@ -10,6 +10,7 @@ import {
   asc,
   desc,
   count,
+  isNotNull,
   sql,
   type SQL,
 } from "drizzle-orm";
@@ -85,11 +86,16 @@ function buildWhereClause(
 function getOrderBy(sorting: Params["sorting"]) {
   switch (sorting) {
     case "newest":
-      return [desc(analyses.createdAt)];
+      return [desc(articles.publishedTime), desc(articles.id)];
     case "oldest":
-      return [asc(analyses.createdAt)];
+      return [asc(articles.publishedTime), asc(articles.id)];
     case "factualScore":
-      return [desc(analyses.factualScore), desc(analyses.createdAt)];
+      return [
+        sql`CASE WHEN ${analyses.id} IS NULL THEN 1 ELSE 0 END`,
+        desc(analyses.factualScore),
+        desc(articles.publishedTime),
+        desc(articles.id),
+      ];
   }
 }
 
@@ -98,14 +104,20 @@ export async function queryAnalysesPreviews({
   search,
   filters,
   sorting,
+  includeUnanalyzed = false,
 }: Params) {
   const offset = (page - 1) * pageSize;
   const whereClause = buildWhereClause(filters, search);
+  const combinedWhereClause = includeUnanalyzed
+    ? whereClause
+    : and(whereClause, isNotNull(analyses.id));
   const orderByClause = getOrderBy(sorting);
 
   const [rows, totalResultsQuery] = await Promise.all([
     db
       .select({
+        articleId: articles.id,
+        analysisId: analyses.id,
         slug: analyses.slug,
         sentiment: analyses.sentiment,
         factualScore: analyses.factualScore,
@@ -118,20 +130,20 @@ export async function queryAnalysesPreviews({
         sourceName: sources.name,
         sourceBias: sources.bias,
       })
-      .from(analyses)
-      .innerJoin(articles, eq(analyses.articleId, articles.id))
+      .from(articles)
+      .leftJoin(analyses, eq(analyses.articleId, articles.id))
       .innerJoin(sources, eq(articles.sourceId, sources.id))
-      .where(whereClause)
+      .where(combinedWhereClause)
       .orderBy(...orderByClause)
       .limit(pageSize)
       .offset(offset),
 
     db
       .select({ count: count() })
-      .from(analyses)
-      .innerJoin(articles, eq(analyses.articleId, articles.id))
+      .from(articles)
+      .leftJoin(analyses, eq(analyses.articleId, articles.id))
       .innerJoin(sources, eq(articles.sourceId, sources.id))
-      .where(whereClause),
+      .where(combinedWhereClause),
   ]);
 
   const totalResults = totalResultsQuery[0]?.count ?? 0;

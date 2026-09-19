@@ -1,7 +1,9 @@
-import { Preview } from "@/app/_lib/types/analyses-previews";
+import type { DiscoverResult } from "@/app/_lib/types/analyses-previews";
 
 type AnalysisPreviewRow = {
-  slug: string;
+  articleId: string;
+  analysisId: string | null;
+  slug: string | null;
   sentiment: string | null;
   factualScore: number | null;
   biasScore: number | null;
@@ -47,8 +49,8 @@ function mapFactualScore(value: number | null): number | undefined {
   return value;
 }
 
-export function mapRowToPreview(row: AnalysisPreviewRow): Preview {
-  return {
+export function mapRowToPreview(row: AnalysisPreviewRow): DiscoverResult {
+  const baseCard = {
     source: {
       name: row.sourceName,
       bias: mapBias(row.sourceBias),
@@ -60,6 +62,19 @@ export function mapRowToPreview(row: AnalysisPreviewRow): Preview {
       excerpt: row.articleExcerpt,
       url: row.articleUrl,
     },
+  };
+
+  if (!row.analysisId || !row.slug) {
+    return {
+      ...baseCard,
+      kind: "unanalyzed",
+      articleId: row.articleId,
+    };
+  }
+
+  return {
+    ...baseCard,
+    kind: "analyzed",
     analysis: {
       slug: row.slug,
       biasScore: row.biasScore ?? undefined,

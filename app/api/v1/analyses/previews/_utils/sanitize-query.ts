@@ -93,6 +93,7 @@ export function sanitizePreviewsQuery(searchParams: URLSearchParams): Params {
       ),
     },
     sorting: validateSort(searchParams.get("sort")),
+    includeUnanalyzed: searchParams.get("includeUnanalyzed") === "true",
     filters: {
       minFactualScore:
         minFactualScore !== undefined &&

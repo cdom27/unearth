@@ -43,7 +43,7 @@ export default function Search({
         e.preventDefault();
         handleSubmit();
       }}
-      className="flex flex-col gap-3 w-full lg:max-w-150"
+      className="flex flex-col gap-3 w-full lg:max-w-125"
     >
       <div
         className="flex items-center gap-6 justify-between rounded-md p-1.5 bg-clay-150 border border-clay-200 focus-within:border-clay-800 transition-colors duration-250"

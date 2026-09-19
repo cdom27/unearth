@@ -1,11 +1,11 @@
 import { mapRowToPreview } from "../_utils/map-previews";
 import { queryAnalysesPreviews } from "./queries";
 import { sanitizePreviewsQuery } from "../_utils/sanitize-query";
-import type { PreviewsResult } from "@/app/_lib/types/analyses-previews";
+import type { DiscoverResultsResult } from "@/app/_lib/types/analyses-previews";
 
 export async function getAnalysesPreviews(
   searchParams: URLSearchParams,
-): Promise<PreviewsResult> {
+): Promise<DiscoverResultsResult> {
   const params = sanitizePreviewsQuery(searchParams);
   const { rows, totalResults } = await queryAnalysesPreviews(params);
   const previews = rows.map(mapRowToPreview);
