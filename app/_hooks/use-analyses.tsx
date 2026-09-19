@@ -1,5 +1,8 @@
 import { useCallback, useRef, useState } from "react";
-import type { Preview, PreviewsResult } from "../_lib/types/analyses-previews";
+import type {
+  DiscoverResult,
+  DiscoverResultsResult,
+} from "../_lib/types/analyses-previews";
 import type { ApiResponse } from "../api/_lib/build-response";
 import type { Params } from "../_lib/types/preview-params";
 
@@ -10,9 +13,10 @@ export default function useAnalyses(
   sorting: Params["sorting"] = "newest",
   filters: NonNullable<Params["filters"]> = {},
   search = "",
+  includeUnanalyzed = false,
 ) {
   const [isFetching, setIsFetching] = useState(false);
-  const [previewsResult, setPreviewsResult] = useState<PreviewsResult>({
+  const [previewsResult, setPreviewsResult] = useState<DiscoverResultsResult>({
     previews: [],
     totalResults: 0,
   });
@@ -34,6 +38,7 @@ export default function useAnalyses(
         pageSize: String(pageSize),
         sort: sorting,
       });
+      if (includeUnanalyzed) params.set("includeUnanalyzed", "true");
       if (search) params.set("q", search);
       const scalarFilters = [
         "minFactualScore",
@@ -45,7 +50,9 @@ export default function useAnalyses(
       ] as const;
       scalarFilters.forEach((filter) => {
         const value = filters[filter];
-        if (value !== undefined && value !== "") params.set(filter, String(value));
+        if (value !== undefined && value !== "") {
+          params.set(filter, String(value));
+        }
       });
       const arrayFilters = ["sources", "sentiments", "credibilities"] as const;
       arrayFilters.forEach((filter) => {
@@ -54,7 +61,8 @@ export default function useAnalyses(
       });
       const response = await fetch(`/api/v1/analyses/previews?${params}`);
 
-      const result = (await response.json()) as ApiResponse<PreviewsResult>;
+      const result =
+        (await response.json()) as ApiResponse<DiscoverResultsResult>;
 
       if (result.data && response.ok) {
         const data = result.data;
@@ -62,10 +70,19 @@ export default function useAnalyses(
         nextPage.current += 1;
 
         const addedPreviews = data.previews.filter(
-          (preview: Preview) => !loadedSlugs.current.has(preview.analysis.slug),
+          (preview: DiscoverResult) =>
+            !loadedSlugs.current.has(
+              preview.kind === "analyzed"
+                ? preview.analysis.slug
+                : preview.articleId,
+            ),
         );
         addedPreviews.forEach((preview) =>
-          loadedSlugs.current.add(preview.analysis.slug),
+          loadedSlugs.current.add(
+            preview.kind === "analyzed"
+              ? preview.analysis.slug
+              : preview.articleId,
+          ),
         );
 
         setPreviewsResult((previous) => ({
@@ -85,7 +102,7 @@ export default function useAnalyses(
       isRequestInFlight.current = false;
       setIsFetching(false);
     }
-  }, [filters, hasMore, pageSize, search, sorting]);
+  }, [filters, hasMore, includeUnanalyzed, pageSize, search, sorting]);
 
   return {
     fetchAnalysisPreviews,

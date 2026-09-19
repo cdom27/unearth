@@ -80,12 +80,14 @@ export default async function Discover({
     sentiments: resolveValues(params.sentiments),
     credibilities: resolveValues(params.credibilities),
   };
+  const includeUnanalyzed = params.includeUnanalyzed === "true";
 
   return (
     <DiscoverProvider
       initialSearch={initialSearch}
       initialSorting={initialSorting}
       initialFilters={initialFilters}
+      initialIncludeUnanalyzed={includeUnanalyzed}
     >
       <section className="m-4 sm:my-6 sm:mx-12 md:my-10 xl:my-16 2xl:my-22 pb-8 sm:pb-12 md:pb-16 xl:pb-22 2xl:pb-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col border-b border-clay-200">
         <div className="flex flex-col gap-6">
