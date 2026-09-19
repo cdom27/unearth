@@ -4,7 +4,10 @@ import {
   FocusEvent,
   KeyboardEvent,
   MouseEvent,
+  ReactElement,
   ReactNode,
+  Children,
+  cloneElement,
   useId,
   useState,
 } from "react";
@@ -13,24 +16,26 @@ interface ExplanationPopoverProps {
   content: ReactNode;
   children: ReactNode;
   className?: string;
+  asChild?: boolean;
 }
 
 export default function ExplanationPopover({
   content,
   children,
   className = "",
+  asChild = false,
 }: ExplanationPopoverProps) {
   const descriptionId = useId();
   const [isOpen, setIsOpen] = useState(false);
 
-  function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.key === "Escape") {
       setIsOpen(false);
       event.currentTarget.blur();
     }
   }
 
-  function handleBlur(event: FocusEvent<HTMLButtonElement>) {
+  function handleBlur(event: FocusEvent<HTMLElement>) {
     if (!event.currentTarget.parentElement?.contains(event.relatedTarget)) {
       setIsOpen(false);
     }
@@ -51,25 +56,39 @@ export default function ExplanationPopover({
     }
   }
 
+  const triggerProps = {
+    "aria-expanded": isOpen,
+    "aria-describedby": isOpen ? descriptionId : undefined,
+    onFocus: () => setIsOpen(true),
+    onBlur: handleBlur,
+    onKeyDown: handleKeyDown,
+  };
+
+  const childElements = Children.toArray(children);
+  const trigger =
+    asChild && childElements.length === 1
+      ? cloneElement(childElements[0] as ReactElement, triggerProps)
+      : asChild
+        ? null
+        : (
+        <button
+          type="button"
+          {...triggerProps}
+          aria-label="Show explanation"
+          className="inline-flex items-center gap-1.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clay-500"
+          onClick={() => setIsOpen((open) => !open)}
+        >
+          {children}
+        </button>
+          );
+
   return (
     <span
       className={`relative inline-flex ${className}`.trim()}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <button
-        type="button"
-        aria-label="Show explanation"
-        aria-expanded={isOpen}
-        aria-describedby={isOpen ? descriptionId : undefined}
-        className="inline-flex items-center gap-1.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clay-500"
-        onClick={() => setIsOpen((open) => !open)}
-        onFocus={() => setIsOpen(true)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-      >
-        {children}
-      </button>
+      {trigger}
 
       <span
         id={descriptionId}
