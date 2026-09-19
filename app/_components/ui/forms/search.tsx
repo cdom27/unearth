@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import Button from "../button/button";
 import MagnifyingGlassIcon from "../../icons/magnifying-glass";
@@ -34,10 +32,7 @@ export default function Search({
     const nextSearch = query.trim();
     if (nextSearch === value) return;
 
-    const timeout = window.setTimeout(
-      () => onSearch(nextSearch),
-      debounceMs,
-    );
+    const timeout = window.setTimeout(() => onSearch(nextSearch), debounceMs);
 
     return () => window.clearTimeout(timeout);
   }, [debounceMs, onSearch, query, value]);
@@ -81,8 +76,6 @@ export default function Search({
           <span>{buttonLabel}</span>
         </Button>
       </div>
-
-      {/*<span className="text-red-500">{message}</span>*/}
 
       <Button
         type="submit"
