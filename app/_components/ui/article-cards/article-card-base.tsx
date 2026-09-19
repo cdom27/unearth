@@ -34,6 +34,23 @@ export function ArticleCardBaseSkeleton() {
   );
 }
 
+function formatSourceName(name: string) {
+  if (name.length <= 20) return name;
+
+  const parentheticalStart = name.indexOf(" (");
+  const nameWithoutParenthetical =
+    parentheticalStart > 0 ? name.slice(0, parentheticalStart) : name;
+
+  if (
+    nameWithoutParenthetical.length < name.length &&
+    nameWithoutParenthetical.length <= 24
+  ) {
+    return `${nameWithoutParenthetical}...`;
+  }
+
+  return `${name.slice(0, 20).trimEnd()}...`;
+}
+
 export default function ArticleCardBase({
   article,
   source,
@@ -77,7 +94,9 @@ export default function ArticleCardBase({
         <div className="text-clay-50 bg-clay-900 rounded-b-sm min-h-10 flex items-center justify-center gap-3 p-3">
           <div className="flex items-center gap-3">
             <QuoteIcon className="size-6" />
-            <span className="text-lg">{source.name}</span>
+            <span className="text-lg whitespace-nowrap" title={source.name}>
+              {formatSourceName(source.name)}
+            </span>
           </div>
 
           {badge && (
