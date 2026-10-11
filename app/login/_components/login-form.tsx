@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type SyntheticEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/app/_lib/auth/auth-client";
 
@@ -9,7 +9,7 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setIsPending(true);
