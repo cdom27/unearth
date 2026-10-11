@@ -24,7 +24,10 @@ export default function RegisterForm() {
       });
 
       if (result.error) {
-        setError(result.error.message ?? "Unable to create your account. Please try again.");
+        setError(
+          result.error.message ??
+            "Unable to create your account. Please try again.",
+        );
         return;
       }
 
@@ -41,15 +44,34 @@ export default function RegisterForm() {
     <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor="register-name">Name</label>
-        <input id="register-name" name="name" type="text" autoComplete="name" required />
+        <input
+          id="register-name"
+          name="name"
+          type="text"
+          autoComplete="name"
+          required
+        />
       </div>
       <div>
         <label htmlFor="register-email">Email</label>
-        <input id="register-email" name="email" type="email" autoComplete="email" required />
+        <input
+          id="register-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+        />
       </div>
       <div>
         <label htmlFor="register-password">Password</label>
-        <input id="register-password" name="password" type="password" autoComplete="new-password" required minLength={8} />
+        <input
+          id="register-password"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={15}
+        />
       </div>
       {error && <p role="alert">{error}</p>}
       <button type="submit" disabled={isPending}>

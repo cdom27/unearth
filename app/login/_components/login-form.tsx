@@ -40,11 +40,23 @@ export default function LoginForm() {
     <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor="login-email">Email</label>
-        <input id="login-email" name="email" type="email" autoComplete="email" required />
+        <input
+          id="login-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+        />
       </div>
       <div>
         <label htmlFor="login-password">Password</label>
-        <input id="login-password" name="password" type="password" autoComplete="current-password" required />
+        <input
+          id="login-password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+        />
       </div>
       {error && <p role="alert">{error}</p>}
       <button type="submit" disabled={isPending}>
