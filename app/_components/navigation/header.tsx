@@ -8,14 +8,25 @@ import MenuIcon from "../icons/menu";
 import { links } from "@/app/_lib/static/links";
 import { navLinks } from "@/app/_lib/static/nav-links";
 import SideMenu from "../ui/side-menu/side-menu";
+import LinkButton from "../ui/link-button/link-button";
+import { authClient } from "@/app/_lib/auth/auth-client";
+import Banner from "./banner";
+import ResendVerificationLink from "../auth/resend-verification-link";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   const pathname = usePathname();
+  const { data: session } = authClient.useSession();
 
   return (
     <header>
+      {session && !session.user.emailVerified && (
+        <Banner>
+          <span>Your email address is not verified.</span>
+          <ResendVerificationLink email={session.user.email} />
+        </Banner>
+      )}
       <div className="m-4 sm:my-6 sm:mx-12 pb-4 sm:pb-6 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex justify-between items-center border-b border-clay-200">
         <Link
           href="/"
@@ -51,24 +62,44 @@ export default function Header() {
           </ul>
         </nav>
 
-        <button
-          type="button"
-          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-          aria-controls="navigation-menu"
-          aria-expanded={isOpen}
-          className="hover:cursor-pointer"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <MenuIcon className="w-9" />
-          <span className="sr-only">
-            {isOpen ? "Close navigation menu" : "Open navigation menu"}
-          </span>
-        </button>
+        <div className="flex items-center gap-5">
+          <LinkButton
+            href={session ? "/account" : "/login"}
+            className="hidden sm:inline-flex items-center"
+          >
+            {session ? "Account" : "Login"}
+          </LinkButton>
+
+          <button
+            type="button"
+            aria-label={
+              isOpen ? "Close navigation menu" : "Open navigation menu"
+            }
+            aria-controls="navigation-menu"
+            aria-expanded={isOpen}
+            className="hover:cursor-pointer"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <MenuIcon className="w-9" />
+            <span className="sr-only">
+              {isOpen ? "Close navigation menu" : "Open navigation menu"}
+            </span>
+          </button>
+        </div>
       </div>
 
       <SideMenu open={isOpen} setOpen={setIsOpen} id="navigation-menu">
         <nav>
           <ul className="flex flex-col gap-4">
+            <li className="flex">
+              <Link
+                href={session ? "/account" : "/login"}
+                onClick={() => setIsOpen(false)}
+                className="text-2xl w-full p-2 border-b border-clay-800 text-clay-100"
+              >
+                {session ? "Account" : "Login"}
+              </Link>
+            </li>
             {links.map((cat) => (
               <li key={cat.name}>
                 <ul>
