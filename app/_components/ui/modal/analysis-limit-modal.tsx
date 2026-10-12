@@ -26,11 +26,8 @@ export default function AnalysisLimitModal({
       : "Readers can have 2 analyses running and 3 articles waiting. Wait for an item to finish before adding more.";
 
   return (
-    <Modal isOpen onClose={onCloseAction} labelledBy="analysis-limit-title">
-      <div className="pr-6">
-        <h2 id="analysis-limit-title" className="mb-3 font-serif text-3xl">
-          {title}
-        </h2>
+    <Modal isOpen title={title} onClose={onCloseAction}>
+      <div>
         <p className="text-base leading-relaxed">{description}</p>
 
         {limit.audience === "guest" ? (

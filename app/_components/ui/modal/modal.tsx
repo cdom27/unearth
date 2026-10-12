@@ -1,20 +1,24 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useId } from "react";
+import XIcon from "../../icons/x";
+import Button from "../button/button";
 
 interface ModalProps {
   isOpen: boolean;
+  title: string;
   onClose: () => void;
-  labelledBy?: string;
   children: ReactNode;
 }
 
 export default function Modal({
   isOpen,
+  title,
   onClose,
-  labelledBy,
   children,
 }: ModalProps) {
+  const titleId = useId();
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -38,18 +42,25 @@ export default function Modal({
       <section
         role="dialog"
         aria-modal="true"
-        aria-labelledby={labelledBy}
-        className="relative w-full max-w-lg rounded-lg bg-clay-50 p-6 text-clay-900 shadow-2xl sm:p-8"
+        aria-labelledby={titleId}
+        className="w-full max-w-lg rounded-lg bg-clay-50 p-6 text-clay-900 shadow-2xl sm:p-8"
       >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close dialog"
-          className="absolute right-4 top-4 rounded p-2 text-2xl leading-none hover:bg-clay-150"
-        >
-          ×
-        </button>
-        {children}
+        <div className="flex items-center justify-between pb-6">
+          <h2 id={titleId} className="font-serif text-2xl">
+            {title}
+          </h2>
+
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={onClose}
+            aria-label="Close dialog"
+          >
+            <XIcon className="size-4" />
+          </Button>
+        </div>
+
+        <div>{children}</div>
       </section>
     </div>
   );
