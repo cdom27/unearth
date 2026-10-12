@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { after } from "next/server";
 import { db } from "@/app/_lib/db/client";
@@ -134,5 +135,33 @@ export const auth = betterAuth({
         }
       });
     },
+  },
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/change-password") return;
+
+      const result = ctx.context.returned;
+      const email = ctx.context.session?.user.email;
+      if (
+        !email ||
+        !result ||
+        typeof result !== "object" ||
+        !("user" in result)
+      ) {
+        return;
+      }
+
+      try {
+        after(async () => {
+          try {
+            await sendPasswordChangedEmail(email);
+          } catch (error) {
+            console.error("Failed to send password changed email:", error);
+          }
+        });
+      } catch (error) {
+        console.error("Failed to schedule password changed email:", error);
+      }
+    }),
   },
 });

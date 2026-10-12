@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/app/_lib/auth/auth-client";
+import Button from "@/app/_components/ui/button/button";
 
 export default function SignOutButton() {
   const router = useRouter();
@@ -16,8 +17,14 @@ export default function SignOutButton() {
   }
 
   return (
-    <button type="button" onClick={signOut} disabled={isPending}>
+    <Button
+      type="button"
+      onClick={signOut}
+      disabled={isPending}
+      variant="dangerOutline"
+      className="w-full"
+    >
       {isPending ? "Signing out…" : "Sign out"}
-    </button>
+    </Button>
   );
 }

@@ -8,7 +8,8 @@ export default function MainContent({ children }: { children: ReactNode }) {
   const isAuthPage =
     pathname === "/login" ||
     pathname === "/register" ||
-    pathname === "/reset-password";
+    pathname === "/reset-password" ||
+    pathname === "/account";
 
   return <main className={isAuthPage ? "" : "min-h-screen"}>{children}</main>;
 }
