@@ -1,4 +1,4 @@
-import timeSince from "@/app/_lib/utils/timeSince";
+import timeSince from "@/app/_lib/utils/time-since";
 import ClockIcon from "../../icons/clock";
 import InfoIcon from "../../icons/info";
 import ExplanationPopover from "../tooltip/explanation-popover";

@@ -1,5 +1,5 @@
 import { getAnalysis } from "@/app/_lib/db/queries";
-import timeSince from "@/app/_lib/utils/timeSince";
+import timeSince from "@/app/_lib/utils/time-since";
 import ShareActions from "./_components/share-actions";
 import { notFound } from "next/navigation";
 import Placeholder from "@/app/_assets/images/placeholder.webp";

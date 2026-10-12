@@ -4,6 +4,7 @@ import "./globals.css";
 import MobileNav from "./_components/navigation/mobile-nav";
 import Header from "./_components/navigation/header";
 import Footer from "./_components/navigation/footer";
+import MainContent from "./_components/layout/main-content";
 
 const archivo = localFont({
   src: [
@@ -87,7 +88,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Header />
-        <main className="min-h-screen">{children}</main>
+        <MainContent>{children}</MainContent>
         <MobileNav />
         <Footer />
       </body>
