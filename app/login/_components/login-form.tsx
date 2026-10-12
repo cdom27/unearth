@@ -125,7 +125,7 @@ export default function LoginForm() {
           type="button"
           onClick={handleForgotPassword}
           disabled={isResetPending}
-          className="font-semibold underline underline-offset-2 disabled:cursor-not-allowed"
+          className="cursor-pointer font-semibold underline underline-offset-2 disabled:cursor-not-allowed"
         >
           {isResetPending ? "Sending reset link…" : "Forgot your password?"}
         </button>
