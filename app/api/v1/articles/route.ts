@@ -64,7 +64,13 @@ export async function POST(request: Request) {
             ? "Your analysis queue is full. Wait for an analysis to finish before adding another article."
             : "You already have an analysis in progress. Guests can analyze one article at a time.";
       const response = apiResponse(
-        { message, data: { reason: admission.result } },
+        {
+          message,
+          data: {
+            reason: admission.result,
+            audience: owner.userId ? "reader" : "guest",
+          },
+        },
         429,
       );
       if (!session) response.headers.set("Set-Cookie", guestCookie(guestId));

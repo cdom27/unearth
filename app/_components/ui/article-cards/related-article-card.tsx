@@ -10,6 +10,7 @@ import CheckIcon from "../../icons/check";
 import Tooltip from "../tooltip/tooltip";
 import ArticleBadge from "./article-badge";
 import ArticleCardBase from "./article-card-base";
+import AnalysisLimitModal from "../modal/analysis-limit-modal";
 
 interface RelatedArticleCardProps {
   article: RelatedArticle;
@@ -34,7 +35,8 @@ function formatUrl(url: string): string {
 export default function RelatedArticleCard({
   article,
 }: RelatedArticleCardProps) {
-  const { analyzeArticle, isAnalyzing, message } = useArticle();
+  const { analyzeArticle, isAnalyzing, message, limit, clearLimit } =
+    useArticle();
   const [isVisible, setIsVisible] = useState(true);
 
   async function handleSubmit() {
@@ -100,6 +102,7 @@ export default function RelatedArticleCard({
           />
         </button>
       </Tooltip>
+      <AnalysisLimitModal limit={limit} onCloseAction={clearLimit} />
     </div>
   );
 }

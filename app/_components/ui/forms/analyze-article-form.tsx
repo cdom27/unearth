@@ -5,11 +5,13 @@ import MagicWandIcon from "../../icons/magic-wand";
 import Button from "../button/button";
 import useArticle from "@/app/_hooks/use-article";
 import CircleNotchIcon from "../../icons/circle-notch";
+import AnalysisLimitModal from "../modal/analysis-limit-modal";
 
 export default function AnalyzeArticleForm() {
   const [url, setUrl] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const { analyzeArticle, isAnalyzing, message } = useArticle();
+  const { analyzeArticle, isAnalyzing, message, limit, clearLimit } =
+    useArticle();
 
   async function handleSubmit() {
     try {
@@ -22,67 +24,78 @@ export default function AnalyzeArticleForm() {
   }
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit();
-      }}
-      className="flex flex-col gap-3 w-full lg:max-w-150 lg:mx-auto"
-    >
-      <div
-        className="flex items-center gap-6 justify-between rounded-md p-1.5 bg-clay-150 border border-clay-200 focus-within:border-clay-800 transition-colors duration-250"
-        onClick={() => inputRef.current?.focus()}
+    <>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+        className="flex flex-col gap-3 w-full lg:max-w-150 lg:mx-auto"
       >
-        <label htmlFor="articleURL" className="sr-only">
-          Enter an article URL
-        </label>
+        <div
+          className="flex items-center gap-6 justify-between rounded-md p-1.5 bg-clay-150 border border-clay-200 focus-within:border-clay-800 transition-colors duration-250"
+          onClick={() => inputRef.current?.focus()}
+        >
+          <label htmlFor="articleURL" className="sr-only">
+            Enter an article URL
+          </label>
 
-        <div className="flex items-center gap-3 pl-3 flex-1">
-          <MagicWandIcon className="size-6" />
+          <div className="flex items-center gap-3 pl-3 flex-1">
+            <MagicWandIcon className="size-6" />
 
-          <input
-            ref={inputRef}
-            id="articleURL"
-            name="articleURL"
-            type="url"
-            value={url}
-            required
-            placeholder="Enter article URL"
-            onChange={(e) => setUrl(e.target.value)}
-            className="w-full focus:outline-none"
-          />
+            <input
+              ref={inputRef}
+              id="articleURL"
+              name="articleURL"
+              type="url"
+              value={url}
+              required
+              placeholder="Enter article URL"
+              onChange={(e) => setUrl(e.target.value)}
+              className="w-full focus:outline-none"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={url === ""}
+            className="hidden sm:block"
+          >
+            {isAnalyzing ? (
+              <span className="flex items-center gap-1.5">
+                <span>Analyzing</span>
+                <CircleNotchIcon className="size-6 animate-spin" />
+              </span>
+            ) : (
+              <span>Analyze Article</span>
+            )}
+          </Button>
         </div>
 
-        <Button type="submit" disabled={url === ""} className="hidden sm:block">
+        <span
+          className={
+            message.toLowerCase().includes("added")
+              ? "text-green-700"
+              : "text-red-500"
+          }
+          role="status"
+        >
+          {message}
+        </span>
+
+        <Button
+          type="submit"
+          disabled={url === ""}
+          className="sm:hidden w-full"
+        >
           {isAnalyzing ? (
-            <span className="flex items-center gap-1.5">
-              <span>Analyzing</span>
-              <CircleNotchIcon className="size-6 animate-spin" />
-            </span>
+            <CircleNotchIcon className="size-6 animate-spin" />
           ) : (
             <span>Analyze Article</span>
           )}
         </Button>
-      </div>
-
-      <span
-        className={
-          message.toLowerCase().includes("added")
-            ? "text-green-700"
-            : "text-red-500"
-        }
-        role="status"
-      >
-        {message}
-      </span>
-
-      <Button type="submit" disabled={url === ""} className="sm:hidden w-full">
-        {isAnalyzing ? (
-          <CircleNotchIcon className="size-6 animate-spin" />
-        ) : (
-          <span>Analyze Article</span>
-        )}
-      </Button>
-    </form>
+      </form>
+      <AnalysisLimitModal limit={limit} onCloseAction={clearLimit} />
+    </>
   );
 }

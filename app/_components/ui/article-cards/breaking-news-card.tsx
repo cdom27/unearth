@@ -7,6 +7,7 @@ import ArticleCardBase, { ArticleCardBaseProps } from "./article-card-base";
 import CircleNotchIcon from "../../icons/circle-notch";
 import XIcon from "../../icons/x";
 import CheckIcon from "../../icons/check";
+import AnalysisLimitModal from "../modal/analysis-limit-modal";
 
 interface BreakingNewsCardProps extends ArticleCardBaseProps {
   onUnprocessable: () => void;
@@ -16,7 +17,8 @@ export default function BreakingNewsCard({
   onUnprocessable,
   ...props
 }: BreakingNewsCardProps) {
-  const { analyzeArticle, isAnalyzing, message } = useArticle();
+  const { analyzeArticle, isAnalyzing, message, limit, clearLimit } =
+    useArticle();
 
   async function handleSubmit() {
     try {
@@ -32,32 +34,37 @@ export default function BreakingNewsCard({
   }
 
   return (
-    <Tooltip
-      id={`bn-${props.article.url}`}
-      content={
-        isAnalyzing ? "Analyzing" : message ? message : "Analyze Article"
-      }
-      icon={
-        isAnalyzing ? (
-          <CircleNotchIcon className="size-6 animate-spin" />
-        ) : message.toLowerCase().includes("added") ? (
-          <CheckIcon className="size-6" />
-        ) : message ? (
-          <XIcon className="size-4" />
-        ) : (
-          <MagicWandIcon className="size-6" />
-        )
-      }
-      variant={message === "Unable to process source" ? "secondary" : "default"}
-    >
-      <button
-        onClick={() => handleSubmit()}
-        className="group hover:cursor-pointer rounded-sm flex disabled:cursor-not-allowed"
-        aria-label={`Analyze: ${props.article.title} by ${props.source.name}`}
-        disabled={isAnalyzing}
+    <>
+      <Tooltip
+        id={`bn-${props.article.url}`}
+        content={
+          isAnalyzing ? "Analyzing" : message ? message : "Analyze Article"
+        }
+        icon={
+          isAnalyzing ? (
+            <CircleNotchIcon className="size-6 animate-spin" />
+          ) : message.toLowerCase().includes("added") ? (
+            <CheckIcon className="size-6" />
+          ) : message ? (
+            <XIcon className="size-4" />
+          ) : (
+            <MagicWandIcon className="size-6" />
+          )
+        }
+        variant={
+          message === "Unable to process source" ? "secondary" : "default"
+        }
       >
-        <ArticleCardBase {...props} />
-      </button>
-    </Tooltip>
+        <button
+          onClick={() => handleSubmit()}
+          className="group hover:cursor-pointer rounded-sm flex disabled:cursor-not-allowed"
+          aria-label={`Analyze: ${props.article.title} by ${props.source.name}`}
+          disabled={isAnalyzing}
+        >
+          <ArticleCardBase {...props} />
+        </button>
+      </Tooltip>
+      <AnalysisLimitModal limit={limit} onCloseAction={clearLimit} />
+    </>
   );
 }
