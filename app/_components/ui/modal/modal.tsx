@@ -43,7 +43,7 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-lg rounded-lg bg-clay-50 p-6 text-clay-900 shadow-2xl sm:p-8"
+        className="w-full max-w-lg rounded-sm bg-clay-50 p-6 text-clay-900 shadow-2xl sm:p-8"
       >
         <div className="flex items-center justify-between pb-6">
           <h2 id={titleId} className="font-serif text-2xl">
