@@ -10,6 +10,9 @@ export default function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isResetPending, setIsResetPending] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
@@ -39,6 +42,31 @@ export default function LoginForm() {
     }
   }
 
+  async function handleForgotPassword() {
+    setResetMessage("");
+
+    if (!email.trim()) {
+      setResetMessage("Enter your email address first.");
+      return;
+    }
+
+    setIsResetPending(true);
+    const genericMessage =
+      "If an account exists for that email, a password reset link will arrive shortly.";
+
+    try {
+      await authClient.requestPasswordReset({
+        email: email.trim(),
+        redirectTo: "/reset-password",
+      });
+      setResetMessage(genericMessage);
+    } catch {
+      setResetMessage(genericMessage);
+    } finally {
+      setIsResetPending(false);
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-2">
@@ -52,6 +80,8 @@ export default function LoginForm() {
             type="email"
             autoComplete="email"
             required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
             placeholder="Your email address"
             className="h-11 w-full bg-transparent px-3 placeholder:text-clay-400 focus:outline-none"
           />
@@ -82,10 +112,29 @@ export default function LoginForm() {
           </button>
         </div>
       </div>
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
       <Button type="submit" disabled={isPending} className="mt-1 w-full">
         {isPending ? "Logging in…" : "Log in"}
       </Button>
+      <div className="flex flex-col items-center gap-2">
+        <button
+          type="button"
+          onClick={handleForgotPassword}
+          disabled={isResetPending}
+          className="font-semibold underline underline-offset-2 disabled:cursor-not-allowed"
+        >
+          {isResetPending ? "Sending reset link…" : "Forgot your password?"}
+        </button>
+        {resetMessage && (
+          <p role="status" className="text-center text-sm text-red-500">
+            {resetMessage}
+          </p>
+        )}
+      </div>
     </form>
   );
 }
