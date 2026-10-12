@@ -3,7 +3,7 @@ import type { ApiResponse } from "../api/_lib/build-response";
 import { normalizeURL } from "../_lib/normalize-url";
 
 export type AnalyzeArticleResult =
-  | { kind: "success"; slug: string }
+  | { kind: "success"; jobId: string }
   | { kind: "unprocessable"; message: string }
   | { kind: "rate-limited"; message: string }
   | { kind: "error"; message: string };
@@ -33,11 +33,13 @@ export default function useArticle() {
           body: JSON.stringify({ url }),
         });
 
-        const result = (await response.json()) as ApiResponse<{ slug: string }>;
+        const result = (await response.json()) as ApiResponse<{
+          jobId: string;
+        }>;
 
         if (result.data && response.ok) {
           setMessage(result.message);
-          return { kind: "success", slug: result.data.slug };
+          return { kind: "success", jobId: result.data.jobId };
         }
 
         setMessage(result.message);

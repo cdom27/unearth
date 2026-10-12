@@ -5,6 +5,7 @@ import MobileNav from "./_components/navigation/mobile-nav";
 import Header from "./_components/navigation/header";
 import Footer from "./_components/navigation/footer";
 import MainContent from "./_components/layout/main-content";
+import AnalysisQueueWidget from "./_components/analysis-queue/analysis-queue-widget";
 
 const archivo = localFont({
   src: [
@@ -91,6 +92,7 @@ export default function RootLayout({
         <MainContent>{children}</MainContent>
         <MobileNav />
         <Footer />
+        <AnalysisQueueWidget />
       </body>
     </html>
   );

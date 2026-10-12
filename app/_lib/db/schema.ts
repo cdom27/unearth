@@ -22,6 +22,12 @@ export const analysisTaskStatusEnum = pgEnum("analysis_task_status", [
   "running",
   "completed",
 ]);
+export const analysisJobStatusEnum = pgEnum("analysis_job_status", [
+  "queued",
+  "running",
+  "completed",
+  "failed",
+]);
 
 export const sources = pgTable("sources", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -109,6 +115,58 @@ export const analyses = pgTable("analyses", {
     .notNull()
     .defaultNow(),
 });
+
+export const analysisJobs = pgTable(
+  "analysis_jobs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
+    guestIdHash: text("guest_id_hash"),
+    articleUrl: text("article_url").notNull(),
+    status: analysisJobStatusEnum("status").notNull().default("queued"),
+    progress: doublePrecision("progress").notNull().default(0),
+    message: text("message"),
+    resultSlug: text("result_slug"),
+    dismissedAt: timestamp("dismissed_at", { withTimezone: true }),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("analysis_jobs_user_status_idx").on(table.userId, table.status),
+    index("analysis_jobs_guest_status_idx").on(table.guestIdHash, table.status),
+  ],
+);
+
+export const usageEvents = pgTable(
+  "usage_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    jobId: uuid("job_id")
+      .notNull()
+      .unique()
+      .references(() => analysisJobs.id, { onDelete: "cascade" }),
+    userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
+    guestIdHash: text("guest_id_hash"),
+    action: text("action").notNull().default("analysis_accepted"),
+    planAtAcceptance: text("plan_at_acceptance").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("usage_events_user_created_idx").on(table.userId, table.createdAt),
+    index("usage_events_guest_created_idx").on(
+      table.guestIdHash,
+      table.createdAt,
+    ),
+  ],
+);
 
 export const rejectedSubmissions = pgTable("rejected_submissions", {
   id: uuid("id").defaultRandom().primaryKey(),

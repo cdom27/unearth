@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import CircleNotchIcon from "../../icons/circle-notch";
 import CheckIcon from "../../icons/check";
 import MagicWandIcon from "../../icons/magic-wand";
@@ -16,11 +15,9 @@ export default function UnanalyzedArticleCard({
   article: UnanalyzedPreview;
 }) {
   const { analyzeArticle, isAnalyzing, message } = useArticle();
-  const router = useRouter();
 
   async function handleAnalyze() {
-    const result = await analyzeArticle(article.article.url);
-    if (result.kind === "success") router.push(`/article/${result.slug}`);
+    await analyzeArticle(article.article.url);
   }
 
   return (
@@ -30,7 +27,7 @@ export default function UnanalyzedArticleCard({
       icon={
         isAnalyzing ? (
           <CircleNotchIcon className="size-6 animate-spin" />
-        ) : message === "Analysis Complete!" ? (
+        ) : message.toLowerCase().includes("added") ? (
           <CheckIcon className="size-6" />
         ) : message ? (
           <XIcon className="size-4" />

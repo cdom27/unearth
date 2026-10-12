@@ -4,7 +4,6 @@ import useArticle from "@/app/_hooks/use-article";
 import MagicWandIcon from "../../icons/magic-wand";
 import Tooltip from "../tooltip/tooltip";
 import ArticleCardBase, { ArticleCardBaseProps } from "./article-card-base";
-import { useRouter } from "next/navigation";
 import CircleNotchIcon from "../../icons/circle-notch";
 import XIcon from "../../icons/x";
 import CheckIcon from "../../icons/check";
@@ -18,15 +17,12 @@ export default function BreakingNewsCard({
   ...props
 }: BreakingNewsCardProps) {
   const { analyzeArticle, isAnalyzing, message } = useArticle();
-  const router = useRouter();
 
   async function handleSubmit() {
     try {
       const result = await analyzeArticle(props.article.url);
 
-      if (result.kind === "success") {
-        router.push(`/article/${result.slug}`);
-      } else if (result.kind === "unprocessable") {
+      if (result.kind === "unprocessable") {
         onUnprocessable();
       }
     } catch {
@@ -44,7 +40,7 @@ export default function BreakingNewsCard({
       icon={
         isAnalyzing ? (
           <CircleNotchIcon className="size-6 animate-spin" />
-        ) : message === "Analysis Complete!" ? (
+        ) : message.toLowerCase().includes("added") ? (
           <CheckIcon className="size-6" />
         ) : message ? (
           <XIcon className="size-4" />
