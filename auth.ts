@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { admin } from "better-auth/plugins";
 import { after } from "next/server";
 import { db } from "@/app/_lib/db/client";
 
@@ -94,6 +95,16 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+  user: {
+    additionalFields: {
+      plan: {
+        type: "string",
+        required: false,
+        defaultValue: "reader",
+        input: false,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
@@ -164,4 +175,5 @@ export const auth = betterAuth({
       }
     }),
   },
+  plugins: [admin({ defaultRole: "user" })],
 });
