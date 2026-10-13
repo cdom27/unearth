@@ -10,6 +10,7 @@ interface SideMenuProps {
   open: boolean;
   children: ReactNode;
   id?: string;
+  closeOnOverlayClick?: boolean;
 }
 
 export default function SideMenu({
@@ -17,6 +18,7 @@ export default function SideMenu({
   setOpen,
   children,
   id,
+  closeOnOverlayClick = false,
 }: SideMenuProps) {
   const openerRef = useRef<HTMLElement | null>(null);
 
@@ -28,11 +30,14 @@ export default function SideMenu({
       openerRef.current = activeElement;
     }
 
-    const previousOverflow = document.body.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousDocumentOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overflow = previousDocumentOverflow;
+      document.body.style.overflow = previousBodyOverflow;
     };
   }, [open]);
 
@@ -44,13 +49,17 @@ export default function SideMenu({
 
   return (
     <div>
-      <div
-        className={`fixed inset-0 z-20 bg-clay-900 transition-opacity duration-400 ${
+      <button
+        type="button"
+        aria-label="Close menu"
+        tabIndex={open && closeOnOverlayClick ? 0 : -1}
+        disabled={!open || !closeOnOverlayClick}
+        onClick={() => setOpen(false)}
+        className={`fixed inset-0 z-20 bg-clay-900 transition-opacity duration-400 disabled:cursor-default ${
           open
-            ? "opacity-50 pointer-events-auto"
+            ? "opacity-15 pointer-events-auto"
             : "opacity-0 pointer-events-none"
         }`}
-        aria-hidden="true"
       />
       <div
         id={id}

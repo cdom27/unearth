@@ -66,13 +66,8 @@ function validateFilters(filters: FiltersState): ValidationErrors {
 }
 
 export default function Filters() {
-  const {
-    search,
-    sorting,
-    filters,
-    includeUnanalyzed,
-    saveFilters,
-  } = useDiscover();
+  const { search, sorting, filters, includeUnanalyzed, saveFilters } =
+    useDiscover();
   const [isOpen, setIsOpen] = useState(false);
   const [draftSorting, setDraftSorting] = useState(sorting);
   const [draftFilters, setDraftFilters] = useState<FiltersState>(filters);
@@ -172,7 +167,7 @@ export default function Filters() {
 
   return (
     <div className="w-full md:w-auto">
-      <SideMenu setOpen={setIsOpen} open={isOpen}>
+      <SideMenu setOpen={setIsOpen} open={isOpen} closeOnOverlayClick={false}>
         <div className="flex flex-col gap-3">
           <label htmlFor="sorting" className="text-sm font-bold">
             Sort by

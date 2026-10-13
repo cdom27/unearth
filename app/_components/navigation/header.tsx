@@ -88,7 +88,12 @@ export default function Header() {
         </div>
       </div>
 
-      <SideMenu open={isOpen} setOpen={setIsOpen} id="navigation-menu">
+      <SideMenu
+        open={isOpen}
+        setOpen={setIsOpen}
+        id="navigation-menu"
+        closeOnOverlayClick
+      >
         <nav>
           <ul className="flex flex-col gap-4">
             <li className="flex">
