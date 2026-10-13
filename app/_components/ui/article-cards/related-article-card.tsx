@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import useArticle from "@/app/_hooks/use-article";
 import type { RelatedArticle } from "@/app/article/[slug]/related-articles";
 import MagicWandIcon from "../../icons/magic-wand";
@@ -11,6 +10,7 @@ import CheckIcon from "../../icons/check";
 import Tooltip from "../tooltip/tooltip";
 import ArticleBadge from "./article-badge";
 import ArticleCardBase from "./article-card-base";
+import AnalysisLimitModal from "../modal/analysis-limit-modal";
 
 interface RelatedArticleCardProps {
   article: RelatedArticle;
@@ -35,17 +35,14 @@ function formatUrl(url: string): string {
 export default function RelatedArticleCard({
   article,
 }: RelatedArticleCardProps) {
-  const { analyzeArticle, isAnalyzing, message } = useArticle();
-  const router = useRouter();
+  const { analyzeArticle, isAnalyzing, message, limit, clearLimit } =
+    useArticle();
   const [isVisible, setIsVisible] = useState(true);
 
   async function handleSubmit() {
     const result = await analyzeArticle(article.url);
 
-    if (result.kind === "success") {
-      router.push(`/article/${result.slug}`);
-      return;
-    }
+    if (result.kind === "success") return;
 
     if (result.kind === "unprocessable") {
       setIsVisible(false);
@@ -66,7 +63,7 @@ export default function RelatedArticleCard({
         icon={
           isAnalyzing ? (
             <CircleNotchIcon className="size-6 animate-spin" />
-          ) : message === "Analysis Complete!" ? (
+          ) : message.toLowerCase().includes("added") ? (
             <CheckIcon className="size-6" />
           ) : message ? (
             <XIcon className="size-4" />
@@ -105,6 +102,7 @@ export default function RelatedArticleCard({
           />
         </button>
       </Tooltip>
+      <AnalysisLimitModal limit={limit} onCloseAction={clearLimit} />
     </div>
   );
 }
