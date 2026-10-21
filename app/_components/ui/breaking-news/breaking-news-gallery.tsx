@@ -6,52 +6,30 @@ import CircleNotchIcon from "../../icons/circle-notch";
 import BreakingNewsCard from "../article-cards/breaking-news-card";
 import ArticleBadge from "../article-cards/article-badge";
 import { ArticleCardBaseSkeleton } from "../article-cards/article-card-base";
-import type { BreakingNews } from "@/app/_lib/types/breaking-news";
 
 export default function BreakingNewsGallery() {
   const { isFetching, newsResult, fetchNews } = useNewsAPI();
 
-  const [breakingNewsArticles, setBreakingNewsArticles] = useState<
-    BreakingNews[]
-  >([]);
+  const [excludedArticleUrls, setExcludedArticleUrls] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const pageSize = 9;
+  const articles = newsResult?.articles ?? [];
+  const loadedArticles = articles.slice(0, (page + 1) * pageSize);
+  const seenUrls = new Set(excludedArticleUrls);
+  const breakingNewsArticles = loadedArticles.filter((news) => {
+    if (seenUrls.has(news.article.url)) return false;
+    seenUrls.add(news.article.url);
+    return true;
+  });
+  const hasMore = newsResult ? (page + 1) * pageSize < articles.length : true;
 
   const observer = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     fetchNews();
   }, [fetchNews]);
-
-  useEffect(() => {
-    if (!newsResult || !newsResult.articles) return;
-
-    const newArticles = newsResult.articles.slice(
-      page * pageSize,
-      (page + 1) * pageSize,
-    );
-
-    const isDone =
-      (newArticles.length === 0 && page > 0) || newArticles.length < pageSize;
-
-    if (newArticles.length === 0 && page > 0) return;
-
-    setTimeout(
-      () => {
-        if (isDone) setHasMore(false);
-
-        setBreakingNewsArticles((prev) => {
-          const existingUrls = new Set(prev.map((bn) => bn.article.url));
-          const filteredNewArticles = newArticles.filter(
-            (bn) => !existingUrls.has(bn.article.url || ""),
-          );
-          return [...prev, ...filteredNewArticles];
-        });
-      },
-      Math.floor(Math.random() * (1000 - 200 + 1)) + 200,
-    );
-  }, [page, newsResult]);
 
   const lastArticleRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -89,11 +67,11 @@ export default function BreakingNewsGallery() {
                 article={news.article}
                 source={news.source}
                 onUnprocessable={() => {
-                  setBreakingNewsArticles((prev) =>
-                    prev.filter(
-                      (article) => article.article.url !== news.article.url,
-                    ),
-                  );
+                  setExcludedArticleUrls((previous) => {
+                    const next = new Set(previous);
+                    next.add(news.article.url);
+                    return next;
+                  });
                 }}
                 badge={
                   <ArticleBadge
@@ -112,7 +90,7 @@ export default function BreakingNewsGallery() {
             {isFetching
               ? "Fetching articles"
               : `Showing ${breakingNewsArticles.length} of
-            ${newsResult?.articles?.length || 0} articles`}
+              ${articles.length} articles`}
           </p>
         </div>
       </div>
