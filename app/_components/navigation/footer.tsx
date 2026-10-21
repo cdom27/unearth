@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LogoIcon from "../icons/logo";
 import { authClient } from "@/app/_lib/auth/auth-client";
-import { footerLinks } from "@/app/_lib/static/links";
+import { footerLinks } from "@/app/_lib/static/footer-links";
 
 export default function Footer() {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);

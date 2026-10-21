@@ -1,5 +1,3 @@
-import { navLinks } from "./nav-links";
-
 type FooterLink = {
   href: string;
   label: string;
@@ -11,30 +9,6 @@ type FooterLinkCategory = {
   name: string;
   links: FooterLink[];
 };
-
-export const links = [
-  {
-    name: "Navigation",
-    links: navLinks,
-  },
-  {
-    name: "Connect",
-    links: [
-      {
-        href: "mailto:cristian@swe.cd",
-        label: "Email",
-      },
-      {
-        href: "https://github.com/cdom27/unearth",
-        label: "GitHub",
-      },
-      {
-        href: "https://swe.cd",
-        label: "Swe.cd",
-      },
-    ],
-  },
-];
 
 export const footerLinks: FooterLinkCategory[] = [
   {
