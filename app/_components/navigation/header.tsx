@@ -115,21 +115,41 @@ export default function Header() {
                     const isHovered = hoveredLink === link.href;
                     return (
                       <li key={link.label} className="flex">
-                        <Link
-                          href={link.href}
-                          onMouseEnter={() => setHoveredLink(link.href)}
-                          onMouseLeave={() => setHoveredLink(null)}
-                          onClick={() => setIsOpen(false)}
-                          className={`text-2xl w-full p-2 border-b border-clay-800 transition-colors duration-300 ${
-                            isHovered
-                              ? "text-brand-500"
-                              : isActive && hoveredLink === null
+                        {link.external ? (
+                          <a
+                            href={link.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onMouseEnter={() => setHoveredLink(link.href)}
+                            onMouseLeave={() => setHoveredLink(null)}
+                            onClick={() => setIsOpen(false)}
+                            className={`text-2xl w-full p-2 border-b border-clay-800 transition-colors duration-300 ${
+                              isHovered
                                 ? "text-brand-500"
-                                : "text-clay-100"
-                          }`}
-                        >
-                          {link.label}
-                        </Link>
+                                : isActive && hoveredLink === null
+                                  ? "text-brand-500"
+                                  : "text-clay-100"
+                            }`}
+                          >
+                            {link.label}
+                          </a>
+                        ) : (
+                          <Link
+                            href={link.href}
+                            onMouseEnter={() => setHoveredLink(link.href)}
+                            onMouseLeave={() => setHoveredLink(null)}
+                            onClick={() => setIsOpen(false)}
+                            className={`text-2xl w-full p-2 border-b border-clay-800 transition-colors duration-300 ${
+                              isHovered
+                                ? "text-brand-500"
+                                : isActive && hoveredLink === null
+                                  ? "text-brand-500"
+                                  : "text-clay-100"
+                            }`}
+                          >
+                            {link.label}
+                          </Link>
+                        )}
                       </li>
                     );
                   })}
