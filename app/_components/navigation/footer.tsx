@@ -28,7 +28,10 @@ export default function Footer() {
 
           <div className="mt-8 border-t border-clay-600 sm:mt-10" />
 
-          <nav aria-label="Footer navigation" className="mt-8 flex justify-center">
+          <nav
+            aria-label="Footer navigation"
+            className="mt-8 flex justify-center"
+          >
             <ul className="mx-auto grid w-fit max-w-full grid-cols-1 justify-items-center gap-14 sm:grid-cols-2 md:grid-cols-[repeat(3,max-content)] md:gap-16">
               {footerLinks.map((category) => (
                 <li
@@ -46,8 +49,10 @@ export default function Footer() {
                         link.account && session ? "My account" : link.label;
                       const isActive = pathname === href;
                       const isHovered = hoveredLink === href;
-                      const className = `block whitespace-nowrap py-[3px] underline-offset-4 transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clay-400 ${
-                        link.account ? "font-medium text-brand-500" : "text-clay-100"
+                      const className = `block whitespace-nowrap py-0.75 underline-offset-4 transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clay-400 ${
+                        link.account
+                          ? "font-medium text-brand-500"
+                          : "text-clay-100"
                       } ${
                         isHovered
                           ? "underline decoration-clay-400"
