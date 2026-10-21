@@ -1,6 +1,6 @@
 import { navLinks } from "./nav-links";
 
-export const links = [
+export const menuLinks = [
   {
     name: "Navigation",
     links: navLinks,

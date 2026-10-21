@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import LogoIcon from "../icons/logo";
 import MenuIcon from "../icons/menu";
-import { links } from "@/app/_lib/static/links";
+import { menuLinks } from "@/app/_lib/static/menu-links";
 import { navLinks } from "@/app/_lib/static/nav-links";
 import SideMenu from "../ui/side-menu/side-menu";
 import LinkButton from "../ui/link-button/link-button";
@@ -105,7 +105,7 @@ export default function Header() {
                 {session ? "Account" : "Login"}
               </Link>
             </li>
-            {links.map((cat) => (
+            {menuLinks.map((cat) => (
               <li key={cat.name}>
                 <ul>
                   <li className="text-lg font-semibold pb-2">{cat.name}</li>
