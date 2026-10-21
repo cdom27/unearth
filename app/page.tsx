@@ -24,7 +24,10 @@ export default function Home() {
         <AnalyzeArticleForm />
       </section>
 
-      <article className="mx-4 mt-4 sm:mt-6 sm:mx-12 md:mt-10 xl:mt-16 2xl:mt-22 pt-4 sm:pt-6 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-12">
+      <article
+        id="breaking-news"
+        className="mx-4 mt-4 sm:mt-6 sm:mx-12 md:mt-10 xl:mt-16 2xl:mt-22 pt-4 sm:pt-6 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-12"
+      >
         <div className="flex flex-col gap-6 sm:flex-row justify-between items-center">
           <h2 className="text-4xl font-serif text-center sm:text-left">
             Breaking News
