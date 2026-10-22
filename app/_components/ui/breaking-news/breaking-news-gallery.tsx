@@ -2,13 +2,12 @@
 
 import useNewsAPI from "@/app/_hooks/use-news-api";
 import { useEffect, useState, useRef, useCallback } from "react";
-import CircleNotchIcon from "../../icons/circle-notch";
 import BreakingNewsCard from "../article-cards/breaking-news-card";
 import ArticleBadge from "../article-cards/article-badge";
-import { ArticleCardBaseSkeleton } from "../article-cards/article-card-base";
+import ArticleGallery from "../article-cards/article-gallery";
 
 export default function BreakingNewsGallery() {
-  const { isFetching, newsResult, fetchNews } = useNewsAPI();
+  const { isFetching, newsResult, error, fetchNews } = useNewsAPI();
 
   const [excludedArticleUrls, setExcludedArticleUrls] = useState<Set<string>>(
     () => new Set(),
@@ -33,11 +32,11 @@ export default function BreakingNewsGallery() {
 
   const lastArticleRef = useCallback(
     (node: HTMLDivElement | null) => {
-      if (!hasMore) return;
-
       if (observer.current) {
         observer.current.disconnect();
       }
+
+      if (!hasMore || error) return;
 
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
@@ -49,51 +48,42 @@ export default function BreakingNewsGallery() {
         observer.current.observe(node);
       }
     },
-    [hasMore],
+    [error, hasMore],
   );
 
   return (
-    <article className="flex flex-col gap-4" aria-busy={isFetching}>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
-        {isFetching && breakingNewsArticles.length === 0
-          ? Array.from({ length: 9 }, (_, index) => (
-              <ArticleCardBaseSkeleton
-                key={`breaking-news-skeleton-${index}`}
-              />
-            ))
-          : breakingNewsArticles.map((news) => (
-              <BreakingNewsCard
-                key={news.article.title.concat(", ", news.source.name)}
-                article={news.article}
-                source={news.source}
-                onUnprocessable={() => {
-                  setExcludedArticleUrls((previous) => {
-                    const next = new Set(previous);
-                    next.add(news.article.url);
-                    return next;
-                  });
-                }}
-                badge={
-                  <ArticleBadge
-                    variant="time"
-                    timeStamp={news.article.publishedAt || ""}
-                  />
-                }
-              />
-            ))}
-      </div>
-
-      <div className="grid grid-cols-1 col-span-3 gap-1.5">
-        {hasMore && <CircleNotchIcon className="size-6 animate-spin mx-auto" />}
-        <div ref={lastArticleRef}>
-          <p className="text-center" role="status" aria-live="polite">
-            {isFetching
-              ? "Fetching articles"
-              : `Showing ${breakingNewsArticles.length} of
-              ${articles.length} articles`}
-          </p>
-        </div>
-      </div>
-    </article>
+    <ArticleGallery
+      count={breakingNewsArticles.length}
+      total={articles.length}
+      itemLabel="articles"
+      isFetching={isFetching}
+      hasItems={breakingNewsArticles.length > 0}
+      error={error}
+      loadingMessage="Fetching breaking news…"
+      emptyMessage="No breaking news available."
+      sentinelRef={lastArticleRef}
+      showMoreIndicator={hasMore}
+    >
+      {breakingNewsArticles.map((news) => (
+        <BreakingNewsCard
+          key={news.article.title.concat(", ", news.source.name)}
+          article={news.article}
+          source={news.source}
+          onUnprocessable={() => {
+            setExcludedArticleUrls((previous) => {
+              const next = new Set(previous);
+              next.add(news.article.url);
+              return next;
+            });
+          }}
+          badge={
+            <ArticleBadge
+              variant="time"
+              timeStamp={news.article.publishedAt || ""}
+            />
+          }
+        />
+      ))}
+    </ArticleGallery>
   );
 }

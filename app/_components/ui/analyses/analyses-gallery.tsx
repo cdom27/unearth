@@ -4,10 +4,9 @@ import useAnalyses from "@/app/_hooks/use-analyses";
 import type { Params } from "@/app/_lib/types/preview-params";
 import { useDiscover } from "@/app/discover/_components/discover-provider";
 import { useCallback, useEffect, useRef } from "react";
-import CircleNotchIcon from "../../icons/circle-notch";
 import AnalysisPreviewCard from "../article-cards/analysis-preview-card";
 import UnanalyzedArticleCard from "../article-cards/unanalyzed-article-card";
-import { ArticleCardBaseSkeleton } from "../article-cards/article-card-base";
+import ArticleGallery from "../article-cards/article-gallery";
 
 type AnalysesGalleryResultsProps = {
   sorting: Params["sorting"];
@@ -37,7 +36,7 @@ function AnalysesGalleryResults({
   search,
   includeUnanalyzed,
 }: AnalysesGalleryResultsProps) {
-  const { isFetching, previewsResult, hasMore, fetchAnalysisPreviews } =
+  const { isFetching, previewsResult, hasMore, error, fetchAnalysisPreviews } =
     useAnalyses(9, sorting, filters, search, includeUnanalyzed);
 
   const observer = useRef<IntersectionObserver | null>(null);
@@ -48,11 +47,11 @@ function AnalysesGalleryResults({
 
   const lastAnalysisRef = useCallback(
     (node: HTMLDivElement | null) => {
-      if (!hasMore || isFetching) return;
-
       if (observer.current) {
         observer.current.disconnect();
       }
+
+      if (!hasMore || isFetching || error) return;
 
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
@@ -64,36 +63,29 @@ function AnalysesGalleryResults({
         observer.current.observe(node);
       }
     },
-    [fetchAnalysisPreviews, hasMore, isFetching],
+    [error, fetchAnalysisPreviews, hasMore, isFetching],
   );
 
   return (
-    <article className="flex flex-col gap-4" aria-busy={isFetching}>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
-        {isFetching && previewsResult.previews.length === 0
-          ? Array.from({ length: 9 }, (_, index) => (
-              <ArticleCardBaseSkeleton key={`analysis-skeleton-${index}`} />
-            ))
-          : previewsResult.previews.map((ap) => (
-              ap.kind === "analyzed" ? (
-                <AnalysisPreviewCard key={ap.analysis.slug} preview={ap} />
-              ) : (
-                <UnanalyzedArticleCard key={ap.articleId} article={ap} />
-              )
-            ))}
-      </div>
-
-      <div className="grid grid-cols-1 col-span-3 gap-1.5">
-        {hasMore && <CircleNotchIcon className="size-6 animate-spin mx-auto" />}
-        <div ref={lastAnalysisRef}>
-          <p className="text-center" role="status" aria-live="polite">
-            {isFetching
-              ? "Fetching articles"
-              : `Showing ${previewsResult.previews.length} of
-  ${previewsResult?.totalResults || 0} stories`}
-          </p>
-        </div>
-      </div>
-    </article>
+    <ArticleGallery
+      count={previewsResult.previews.length}
+      total={previewsResult.totalResults}
+      itemLabel="stories"
+      isFetching={isFetching}
+      hasItems={previewsResult.previews.length > 0}
+      error={error}
+      loadingMessage="Fetching stories…"
+      emptyMessage="No stories found."
+      sentinelRef={lastAnalysisRef}
+      showMoreIndicator={hasMore}
+    >
+      {previewsResult.previews.map((ap) => (
+        ap.kind === "analyzed" ? (
+          <AnalysisPreviewCard key={ap.analysis.slug} preview={ap} />
+        ) : (
+          <UnanalyzedArticleCard key={ap.articleId} article={ap} />
+        )
+      ))}
+    </ArticleGallery>
   );
 }

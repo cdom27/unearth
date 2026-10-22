@@ -15,13 +15,14 @@ export default function useAnalyses(
   search = "",
   includeUnanalyzed = false,
 ) {
-  const [isFetching, setIsFetching] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [previewsResult, setPreviewsResult] = useState<DiscoverResultsResult>({
     previews: [],
     totalResults: 0,
   });
   const [hasMore, setHasMore] = useState(true);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const nextPage = useRef(1);
   const isRequestInFlight = useRef(false);
   const loadedSlugs = useRef(new Set<string>());
@@ -31,6 +32,7 @@ export default function useAnalyses(
 
     isRequestInFlight.current = true;
     setIsFetching(true);
+    setError(null);
 
     try {
       const params = new URLSearchParams({
@@ -94,10 +96,11 @@ export default function useAnalyses(
             loadedSlugs.current.size < data.totalResults,
         );
       } else {
-        setMessage(result.message || "Unable to fetch analyses.");
+        setError("Unable to fetch analyses.");
       }
     } catch {
       setMessage("An unexpected error has occurred.");
+      setError("Unable to fetch analyses.");
     } finally {
       isRequestInFlight.current = false;
       setIsFetching(false);
@@ -110,5 +113,6 @@ export default function useAnalyses(
     previewsResult,
     hasMore,
     message,
+    error,
   };
 }
