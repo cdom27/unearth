@@ -37,7 +37,7 @@ export const footerLinks: FooterLinkCategory[] = [
     links: [
       { href: "mailto:hello@unearth.news", label: "hello@unearth.news" },
       {
-        href: "https://github.com/unearth",
+        href: "https://github.com/cdom27/unearth",
         label: "Github repository",
         external: true,
       },

@@ -1,24 +1,37 @@
 import { navLinks } from "./nav-links";
 
-export const menuLinks = [
+type MenuLinkCategory = {
+  name: string;
+  links: typeof navLinks;
+};
+
+export const menuLinks: MenuLinkCategory[] = [
   {
     name: "Navigation",
-    links: navLinks,
+    links: [
+      ...navLinks,
+      {
+        href: "/about",
+        label: "About",
+      },
+    ],
   },
   {
     name: "Connect",
     links: [
       {
-        href: "mailto:cristian@swe.cd",
-        label: "Email",
+        href: "mailto:hello@unearth.news",
+        label: "Email Unearth",
       },
       {
         href: "https://github.com/cdom27/unearth",
-        label: "GitHub",
+        label: "GitHub repository",
+        external: true,
       },
       {
         href: "https://swe.cd",
-        label: "Swe.cd",
+        label: "Made by swe.cd",
+        external: true,
       },
     ],
   },

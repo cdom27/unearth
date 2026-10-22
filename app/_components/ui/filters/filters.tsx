@@ -189,7 +189,12 @@ export default function Filters() {
 
         <div className="flex-1 overflow-y-auto flex flex-col gap-7 pr-1 menu-scrollbar">
           <FilterSection title="Sources">
+            <label htmlFor="source-query" className="sr-only">
+              Search analyzed sources
+            </label>
             <input
+              id="source-query"
+              name="sourceQuery"
               type="search"
               value={sourceQuery}
               onChange={(event) => setSourceQuery(event.target.value)}
@@ -203,6 +208,8 @@ export default function Filters() {
               {sourceOptions.map((source) => (
                 <CheckboxOption
                   key={source.slug}
+                  id={`source-${source.slug}`}
+                  name="sources"
                   checked={draftFilters.sources?.includes(source.slug) ?? false}
                   label={`${source.name} (${source.count})`}
                   onChange={() =>
@@ -225,6 +232,8 @@ export default function Filters() {
             {metadata?.sentiments.map((option) => (
               <CheckboxOption
                 key={option.value}
+                id={`sentiment-${option.value}`}
+                name="sentiments"
                 checked={
                   draftFilters.sentiments?.includes(option.value) ?? false
                 }
@@ -243,6 +252,8 @@ export default function Filters() {
             {metadata?.credibilities.map((option) => (
               <CheckboxOption
                 key={option.value}
+                id={`credibility-${option.value}`}
+                name="credibilities"
                 checked={
                   draftFilters.credibilities?.includes(option.value) ?? false
                 }
@@ -262,6 +273,10 @@ export default function Filters() {
 
           <ScoreFields
             title="Bias score"
+            minId="bias-score-min"
+            maxId="bias-score-max"
+            minName="minBiasScore"
+            maxName="maxBiasScore"
             error={validationErrors.biasScore}
             values={[draftFilters.minBiasScore, draftFilters.maxBiasScore]}
             onChange={(key, value) =>
@@ -273,6 +288,10 @@ export default function Filters() {
           />
           <ScoreFields
             title="Factual score"
+            minId="factual-score-min"
+            maxId="factual-score-max"
+            minName="minFactualScore"
+            maxName="maxFactualScore"
             error={validationErrors.factualScore}
             values={[
               draftFilters.minFactualScore,
@@ -289,11 +308,15 @@ export default function Filters() {
           <FilterSection title="Published at">
             <div className="grid grid-cols-2 gap-3">
               <DateField
+                id="published-at-from"
+                name="minPublishedAt"
                 label="From"
                 value={dateInputValue(draftFilters.minPublishedAt)}
                 onChange={(value) => updateDate("minPublishedAt", value)}
               />
               <DateField
+                id="published-at-to"
+                name="maxPublishedAt"
                 label="To"
                 value={dateInputValue(draftFilters.maxPublishedAt)}
                 onChange={(value) => updateDate("maxPublishedAt", value)}
@@ -366,10 +389,14 @@ function FilterSection({
 }
 
 function CheckboxOption({
+  id,
+  name,
   checked,
   label,
   onChange,
 }: {
+  id: string;
+  name: string;
   checked: boolean;
   label: string;
   onChange: () => void;
@@ -377,6 +404,8 @@ function CheckboxOption({
   return (
     <label className="flex gap-1.5 items-center text-sm cursor-pointer">
       <input
+        id={id}
+        name={name}
         type="checkbox"
         checked={checked}
         onChange={onChange}
@@ -389,11 +418,19 @@ function CheckboxOption({
 
 function ScoreFields({
   title,
+  minId,
+  maxId,
+  minName,
+  maxName,
   error,
   values,
   onChange,
 }: {
   title: string;
+  minId: string;
+  maxId: string;
+  minName: string;
+  maxName: string;
   error?: string;
   values: [number | undefined, number | undefined];
   onChange: (key: "min" | "max", value: string) => void;
@@ -402,11 +439,15 @@ function ScoreFields({
     <FilterSection title={title}>
       <div className="grid grid-cols-2 gap-3">
         <NumberField
+          id={minId}
+          name={minName}
           label="Min"
           value={values[0]}
           onChange={(value) => onChange("min", value)}
         />
         <NumberField
+          id={maxId}
+          name={maxName}
           label="Max"
           value={values[1]}
           onChange={(value) => onChange("max", value)}
@@ -418,10 +459,14 @@ function ScoreFields({
 }
 
 function NumberField({
+  id,
+  name,
   label,
   value,
   onChange,
 }: {
+  id: string;
+  name: string;
   label: string;
   value?: number;
   onChange: (value: string) => void;
@@ -430,6 +475,8 @@ function NumberField({
     <label className="flex flex-col gap-1 text-xs text-clay-300">
       {label}
       <input
+        id={id}
+        name={name}
         type="number"
         step="0.01"
         value={value ?? ""}
@@ -443,10 +490,14 @@ function NumberField({
 }
 
 function DateField({
+  id,
+  name,
   label,
   value,
   onChange,
 }: {
+  id: string;
+  name: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -455,6 +506,8 @@ function DateField({
     <label className="flex flex-col gap-1 text-xs text-clay-300">
       {label}
       <input
+        id={id}
+        name={name}
         type="date"
         value={value}
         onChange={(event) => onChange(event.target.value)}
