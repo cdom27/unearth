@@ -3,6 +3,50 @@ import type {
   NewsFetchResultDTO,
   NewsAPIResponseDTO,
 } from "@/app/api/v1/breaking-news/_lib/dtos/news-api";
+import { db } from "@/app/_lib/db/client";
+import { articles, sources } from "@/app/_lib/db/schema";
+import { desc, eq } from "drizzle-orm";
+
+async function fetchRecentArticlesFromDatabase(): Promise<NewsFetchResultDTO> {
+  const recentArticles = await db
+    .select({
+      sourceName: sources.name,
+      title: articles.title,
+      url: articles.url,
+      thumbnailUrl: articles.thumbnailUrl,
+      publishedTime: articles.publishedTime,
+      excerpt: articles.excerpt,
+      byline: articles.byline,
+    })
+    .from(articles)
+    .innerJoin(sources, eq(articles.sourceId, sources.id))
+    .orderBy(desc(articles.publishedTime), desc(articles.createdAt))
+    .limit(90);
+
+  const structuredArticles: BreakingNews[] = recentArticles.map((article) => ({
+    source: {
+      name: article.sourceName,
+      bias: null,
+    },
+    article: {
+      title: article.title,
+      thumbnailUrl: article.thumbnailUrl,
+      publishedAt: article.publishedTime.toISOString(),
+      excerpt: article.excerpt,
+      byline: article.byline,
+      url: article.url,
+    },
+  }));
+
+  return {
+    success: true,
+    data: {
+      articles: structuredArticles,
+      totalResults: structuredArticles.length,
+    },
+    shouldIngest: false,
+  };
+}
 
 export async function fetchBreakingNews(
   pageSize: number = 100,
@@ -22,6 +66,10 @@ export async function fetchBreakingNews(
     );
 
     const result = (await response.json()) as NewsAPIResponseDTO;
+
+    if (result.status === "error" && result.code === "rateLimited") {
+      return await fetchRecentArticlesFromDatabase();
+    }
 
     if (!response.ok || !result.articles) {
       return {

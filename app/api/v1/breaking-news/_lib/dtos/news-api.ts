@@ -4,11 +4,13 @@ export type NewsFetchResultDTO =
   | {
       success: true;
       data: BreakingNewsResult;
+      shouldIngest?: boolean;
     }
   | { success: false; error: string };
 
 export type NewsAPIResponseDTO = {
   status: string;
+  code?: string;
   totalResults: number;
   articles: NewsAPIArticleDTO[];
 };

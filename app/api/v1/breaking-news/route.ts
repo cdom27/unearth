@@ -14,7 +14,9 @@ export async function GET() {
       });
     }
 
-    after(() => ingestBreakingNewsArticles(newsAPIResponse.data.articles));
+    if (newsAPIResponse.shouldIngest !== false) {
+      after(() => ingestBreakingNewsArticles(newsAPIResponse.data.articles));
+    }
 
     return apiResponse({
       message: "Results fetched!",
