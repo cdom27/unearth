@@ -17,6 +17,7 @@ import ExpandableContent from "./_components/expandable-content";
 import ExpandableCard from "@/app/_components/ui/expandable-card/expandable-card";
 import { getRelatedArticles } from "./related-articles";
 import RelatedArticleCard from "@/app/_components/ui/article-cards/related-article-card";
+import ReportIssueMenu from "./_components/report-issue-menu";
 
 export default async function AnalysisPage({
   params,
@@ -117,7 +118,11 @@ export default async function AnalysisPage({
               </span>
             </div>
 
-            <ShareActions articleTitle={article.title} shareUrl={shareUrl} />
+            <div className="flex items-center justify-between sm:gap-4.5 ">
+              <ShareActions articleTitle={article.title} shareUrl={shareUrl} />
+
+              <ReportIssueMenu />
+            </div>
           </div>
 
           <h1 className="text-4xl leading-tight sm:text-5xl lg:text-7xl font-serif">

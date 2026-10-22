@@ -5,12 +5,30 @@ import LogoIcon from "../../icons/logo";
 import XIcon from "../../icons/x";
 import { ReactNode, useEffect, useRef } from "react";
 
+const sideMenuSizes = {
+  default: "w-full max-w-80",
+  responsive: "w-80 lg:w-1/2 xl:w-1/3 max-w-none",
+} as const;
+
+const sideMenuAlignments = {
+  left: {
+    position: "left-0",
+    closed: "-translate-x-full",
+  },
+  right: {
+    position: "right-0",
+    closed: "translate-x-full",
+  },
+} as const;
+
 interface SideMenuProps {
   setOpen: (action: boolean) => void;
   open: boolean;
   children: ReactNode;
   id?: string;
   closeOnOverlayClick?: boolean;
+  size?: keyof typeof sideMenuSizes;
+  alignment?: keyof typeof sideMenuAlignments;
 }
 
 export default function SideMenu({
@@ -19,8 +37,11 @@ export default function SideMenu({
   children,
   id,
   closeOnOverlayClick = false,
+  size = "default",
+  alignment = "left",
 }: SideMenuProps) {
   const openerRef = useRef<HTMLElement | null>(null);
+  const alignmentClasses = sideMenuAlignments[alignment];
 
   useEffect(() => {
     if (!open) return;
@@ -67,7 +88,7 @@ export default function SideMenu({
         aria-modal="true"
         aria-label="Navigation menu"
         inert={!open}
-        className={`bg-clay-900 text-clay-50 fixed w-full max-w-80 p-4 sm:py-6 flex flex-col gap-4 inset-0 z-30 transition-transform duration-500 ${open ? "translate-0" : "-translate-x-full"}`}
+        className={`bg-clay-900 text-clay-50 fixed ${sideMenuSizes[size]} p-4 sm:py-6 flex flex-col gap-4 inset-y-0 ${alignmentClasses.position} z-30 transition-transform duration-500 ${open ? "translate-0" : alignmentClasses.closed}`}
       >
         <div className="flex justify-between items-center pb-4 border-b border-clay-800">
           <Link
