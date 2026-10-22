@@ -8,7 +8,13 @@ type MenuLinkCategory = {
 export const menuLinks: MenuLinkCategory[] = [
   {
     name: "Navigation",
-    links: navLinks,
+    links: [
+      ...navLinks,
+      {
+        href: "/about",
+        label: "About",
+      },
+    ],
   },
   {
     name: "Connect",
