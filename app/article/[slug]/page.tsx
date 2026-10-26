@@ -21,10 +21,13 @@ import ReportIssueMenu from "./_components/report-issue-menu";
 
 export default async function AnalysisPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ report?: string | string[] }>;
 }) {
   const { slug } = await params;
+  const query = await searchParams;
   const analysisDetails = await getAnalysis(slug);
 
   if (!analysisDetails) notFound();
@@ -121,7 +124,11 @@ export default async function AnalysisPage({
             <div className="flex items-center justify-between sm:gap-4.5 ">
               <ShareActions articleTitle={article.title} shareUrl={shareUrl} />
 
-              <ReportIssueMenu />
+              <ReportIssueMenu
+                slug={slug}
+                analysis={analysis}
+                openOnLoad={query.report === "1"}
+              />
             </div>
           </div>
 
