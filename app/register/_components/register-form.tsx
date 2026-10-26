@@ -6,7 +6,7 @@ import { authClient } from "@/app/_lib/auth/auth-client";
 import Button from "@/app/_components/ui/button/button";
 import EyeIcon from "@/app/_components/icons/eye";
 
-export default function RegisterForm() {
+export default function RegisterForm({ callbackURL = "/account" }: { callbackURL?: string }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
@@ -23,7 +23,7 @@ export default function RegisterForm() {
         name: String(formData.get("name")),
         email: String(formData.get("email")),
         password: String(formData.get("password")),
-        callbackURL: "/account",
+        callbackURL,
       });
 
       if (result.error) {
@@ -34,7 +34,7 @@ export default function RegisterForm() {
         return;
       }
 
-      router.push("/account");
+      router.push(callbackURL);
       router.refresh();
     } catch {
       setError("Unable to create your account. Please try again.");
