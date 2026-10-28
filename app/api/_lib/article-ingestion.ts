@@ -9,6 +9,7 @@ import {
 import { inspectMediaSubmission } from "@/app/api/v1/articles/_lib/utils/inspect-media-submission";
 import { parseArticle } from "@/app/api/v1/articles/_lib/utils/parse-article";
 import { slugify } from "@/app/api/v1/articles/_lib/utils/slugify";
+import { checkContentQuality } from "@/app/api/v1/articles/_lib/utils/content-quality";
 
 const MAX_CONCURRENT_INGESTIONS = 5;
 
@@ -74,6 +75,18 @@ async function ingestCandidate(candidate: NormalizedCandidate) {
         inspection.finalUrl,
         "parse_failed",
         [{ type: "readability_parse", value: "no_article_content" }],
+      );
+      return;
+    }
+
+    const quality = checkContentQuality(parsedData.article.textContent || "");
+    if (!quality.accepted) {
+      await recordRejection(
+        candidate.submittedUrl,
+        candidate.normalizedUrl,
+        inspection.finalUrl,
+        quality.failedCheck!,
+        quality.signals,
       );
       return;
     }
