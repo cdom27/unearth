@@ -9,6 +9,7 @@ import {
   pgEnum,
   index,
   boolean,
+  integer,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import type { Claim } from "@/app/api/v1/articles/_lib/types/claim";
@@ -197,6 +198,42 @@ export const user = pgTable("user", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+export const analysisReports = pgTable(
+  "analysis_reports",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    analysisId: uuid("analysis_id")
+      .notNull()
+      .references(() => analyses.id, { onDelete: "cascade" }),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => articles.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    section: text("section").notNull(),
+    itemIndex: integer("item_index"),
+    reason: text("reason").notNull(),
+    comment: text("comment"),
+    snapshot: jsonb("snapshot").notNull(),
+    status: text("status").notNull().default("new"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("analysis_reports_analysis_created_idx").on(
+      table.analysisId,
+      table.createdAt,
+    ),
+    index("analysis_reports_user_created_idx").on(table.userId, table.createdAt),
+    index("analysis_reports_status_created_idx").on(table.status, table.createdAt),
+  ],
+);
 
 export const session = pgTable(
   "session",

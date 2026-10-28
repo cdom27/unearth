@@ -6,7 +6,7 @@ import { authClient } from "@/app/_lib/auth/auth-client";
 import Button from "@/app/_components/ui/button/button";
 import EyeIcon from "@/app/_components/icons/eye";
 
-export default function LoginForm() {
+export default function LoginForm({ callbackURL = "/account" }: { callbackURL?: string }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
@@ -25,7 +25,7 @@ export default function LoginForm() {
       const result = await authClient.signIn.email({
         email: String(formData.get("email")),
         password: String(formData.get("password")),
-        callbackURL: "/account",
+        callbackURL,
       });
 
       if (result.error) {
@@ -33,7 +33,7 @@ export default function LoginForm() {
         return;
       }
 
-      router.push("/account");
+      router.push(callbackURL);
       router.refresh();
     } catch {
       setError("Unable to log in. Please try again.");
