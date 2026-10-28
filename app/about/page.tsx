@@ -32,9 +32,11 @@ const analysisSteps = [
 export default function AboutPage() {
   return (
     <div className="mx-4 sm:mx-12 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325">
-      <section className="flex flex-col items-center gap-7 border-b border-clay-200 py-12 text-center sm:py-16 md:py-22">
+      <section className="flex flex-col items-start gap-7 border-b border-clay-200 py-12 sm:py-16 md:py-22">
         <h1 className="max-w-220 font-serif text-5xl leading-[1.05] sm:text-6xl md:text-7xl">
-          A closer look at the news you read
+          A Closer Look at the News{" "}
+          <br className="hidden lg:block" />
+          You Read
         </h1>
         <p className="max-w-175 text-lg leading-relaxed">
           Unearth examines how articles are written, what claims they make, and
