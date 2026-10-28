@@ -138,6 +138,23 @@ function getToolForMode(mode: string): Tool {
           required: ["claims"],
         },
       };
+    case "contentSuitability":
+      return {
+        name: "record_content_suitability",
+        description: "Classify whether supplied page text is suitable for article analysis.",
+        input_schema: {
+          type: "object",
+          properties: {
+            suitable: { type: "boolean" },
+            classification: {
+              type: "string",
+              enum: ["article", "insufficient", "irrelevant", "nonsensical", "unsuitable"],
+            },
+            reason: { type: "string", description: "Concise user-safe reason." },
+          },
+          required: ["suitable", "classification", "reason"],
+        },
+      };
     default:
       throw new Error(`Unsupported mode: ${mode}`);
   }
@@ -150,7 +167,8 @@ export async function anthropic(
     | "rhetoricalFraming"
     | "rhetoricalEvidence"
     | "rhetoricalSynthesis"
-    | "extract",
+    | "extract"
+    | "contentSuitability",
   userMsg: string,
 ) {
   const anth = new Anthropic();
