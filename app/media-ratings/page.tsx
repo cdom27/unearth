@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import UsersAndCharts from "../_components/icons/users-and-charts";
 import SourcesTable from "./_components/sources-table";
 import { MediaRatingsProvider } from "./_components/media-ratings-provider";
 
@@ -45,7 +46,7 @@ export default async function MediaRatings({
 function MediaRatingsContent() {
   return (
     <>
-      <section className="m-4 sm:my-6 sm:mx-12 md:my-10 xl:my-16 2xl:my-22 pb-8 sm:pb-12 md:pb-16 xl:pb-22 2xl:pb-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col border-b border-clay-200">
+      <section className="m-4 sm:my-6 sm:mx-12 md:my-10 xl:my-16 2xl:my-22 pb-8 sm:pb-12 md:pb-16 xl:pb-22 2xl:pb-28 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 grid grid-cols-1 items-center gap-8 border-b border-clay-200 md:grid-cols-[minmax(0,1fr)_auto] md:gap-12">
         <div className="flex flex-col gap-6">
           <h1 className="text-6xl lg:text-7xl font-serif">Media Ratings</h1>
           <p className="text-lg font-sans max-w-150">
@@ -60,6 +61,7 @@ function MediaRatingsContent() {
             </span>
           </p>
         </div>
+        <UsersAndCharts />
       </section>
 
       <article className="mx-4 mt-4 sm:mt-6 sm:mx-12 md:mt-10 xl:mt-16 2xl:mt-22 pt-4 sm:pt-6 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-12">

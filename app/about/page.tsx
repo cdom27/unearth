@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Lightbulb from "../_components/icons/lightbulb";
 import LinkButton from "../_components/ui/link-button/link-button";
 
 export const metadata: Metadata = {
@@ -32,18 +33,23 @@ const analysisSteps = [
 export default function AboutPage() {
   return (
     <div className="mx-4 sm:mx-12 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325">
-      <section className="flex flex-col items-center gap-7 border-b border-clay-200 py-12 text-center sm:py-16 md:py-22">
-        <h1 className="max-w-220 font-serif text-5xl leading-[1.05] sm:text-6xl md:text-7xl">
-          A closer look at the news you read
-        </h1>
-        <p className="max-w-175 text-lg leading-relaxed">
-          Unearth examines how articles are written, what claims they make, and
-          what outside evidence supports them. Explore a story in more depth
-          and decide for yourself what to make of it.
-        </p>
-        <LinkButton href="/register" className="mt-2 inline-flex items-center">
-          Create your free account
-        </LinkButton>
+      <section className="grid grid-cols-1 items-start gap-8 border-b border-clay-200 py-12 sm:py-16 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-12 md:py-22">
+        <div className="flex flex-col items-start gap-7">
+          <h1 className="max-w-220 font-serif text-5xl leading-[1.05] sm:text-6xl md:text-7xl">
+            A Closer Look at the News{" "}
+            <br className="hidden lg:block" />
+            You Read
+          </h1>
+          <p className="max-w-175 text-lg leading-relaxed">
+            Unearth examines how articles are written, what claims they make,
+            and what outside evidence supports them. Explore a story in more
+            depth and decide for yourself what to make of it.
+          </p>
+          <LinkButton href="/register" className="mt-2 inline-flex items-center">
+            Create your free account
+          </LinkButton>
+        </div>
+        <Lightbulb />
       </section>
 
       <section className="grid gap-8 border-b border-clay-200 py-12 sm:py-16 md:grid-cols-[0.8fr_1.2fr] md:gap-16 md:py-20">
