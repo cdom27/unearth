@@ -1,7 +1,7 @@
 import type { IllustrationProps } from "@/app/_lib/types/icon-props";
 
 export default function LaptopAndGlobe({
-  className = "size-70",
+  className = "fill-clay-900 size-70",
   accentClassName = "fill-brand-600",
 }: IllustrationProps) {
   return (

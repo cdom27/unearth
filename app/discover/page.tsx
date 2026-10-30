@@ -99,7 +99,7 @@ export default async function Discover({
             and what the available evidence supports.
           </p>
         </div>
-        <LaptopAndGlobe className="fill-clay-900 size-70" />
+        <LaptopAndGlobe />
       </section>
 
       <article className="mx-4 mt-4 sm:mt-6 sm:mx-12 md:mt-10 xl:mt-16 2xl:mt-22 pt-4 sm:pt-6 lg:mx-18 xl:mx-24 2xl:mx-auto 2xl:max-w-325 flex flex-col gap-12">
